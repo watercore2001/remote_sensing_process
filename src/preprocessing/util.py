@@ -115,7 +115,7 @@ def test_stack_bands_and_crop():
 def get_last_level_sub_folders(root_folder: str):
     for dir_path, dirs, files in os.walk(root_folder):
         if len(dirs) == 0:
-            yield os.path.relpath(dir_path, root_folder)
+            yield dir_path
 
 
 
