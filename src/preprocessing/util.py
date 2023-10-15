@@ -1,3 +1,4 @@
+import json
 import rasterio
 from rasterio.windows import Window
 from rasterio.enums import Resampling
@@ -5,8 +6,23 @@ import numpy as np
 import shutil
 import os
 
-def copy_metadata(input_folder: str, output_folder: str):
+
+def write_metadata(input_folder: str, output_folder: str):
     os.makedirs(output_folder, exist_ok=True)
+
+    bands_filenames = ["B02.tif", "B03.tif", "B04.tif", "B05.tif", "B06.tif",
+                       "B07.tif", "B08.tif", "B8A.tif", "B11.tif", "B12.tif"]
+    metadata = {"bands": []}
+    for input_filename in bands_filenames:
+        input_path = os.path.join(input_folder, input_filename)
+        if not os.path.exists(input_path):
+            continue
+        metadata["bands"].append(os.path.splitext(input_filename)[0])
+
+    metadata_path = os.path.join(output_folder, "metadata.json")
+    with open(metadata_path, "w") as file:
+        json.dump(metadata, file)
+
     copy_filenames = ["tileinfo_metadata.json", "granule_metadata.xml"]
     for filename in copy_filenames:
         input_path = os.path.join(input_folder, filename)
@@ -67,6 +83,8 @@ def stack_bands_and_crop(input_folder: str, output_folder: str,  dst_resolution:
     profile = None
     for input_filename in input_filenames:
         input_path = os.path.join(input_folder, input_filename)
+        if not os.path.exists(input_path):
+            continue
         temp_data, temp_profile = read_data_with_up_sample(input_path, dst_resolution=dst_resolution)
         if data is None and profile is None:
             data = temp_data
@@ -83,7 +101,6 @@ def stack_bands_and_crop(input_folder: str, output_folder: str,  dst_resolution:
     real_window_size = window_size - overlap_size
     row_count = (profile["height"] - window_size) // real_window_size + 1
     col_count = (profile["width"] - window_size) // real_window_size + 1
-
     for row_id in range(row_count):
         row_start = row_id * real_window_size
         row_end = row_start + window_size
@@ -98,11 +115,18 @@ def stack_bands_and_crop(input_folder: str, output_folder: str,  dst_resolution:
                            transform=dst_transform)
             dst_data = data[:, row_start:row_end, col_start:col_end]
 
+            # remove nodata crop
+            nodata_percentage = np.count_nonzero(dst_data == 0) / dst_data.size
+            if nodata_percentage >= 0.5:
+                continue
+
             output_filename = f"{row_id+1:02}{col_id+1:02}.tif"
             output_path = os.path.join(output_folder, output_filename)
 
             with rasterio.open(output_path, "w", **profile) as dst:
                 dst.write(dst_data)
+
+
 
 def test_stack_bands_and_crop():
     input_folder = r"C:\Users\watercore\Desktop\1\S2A_43SCC_20221219_0_L2A"
@@ -111,6 +135,7 @@ def test_stack_bands_and_crop():
     window_size = 512
     overlap_size = 64
     stack_bands_and_crop(input_folder, output_folder, dst_resolution, window_size, overlap_size)
+
 
 def get_last_level_sub_folders(root_folder: str):
     for dir_path, dirs, files in os.walk(root_folder):
