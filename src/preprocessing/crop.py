@@ -125,20 +125,12 @@ def stack_bands_and_crop(input_folder: str, output_folder: str,  dst_resolution:
                 dst.write(dst_data)
 
 
-
-def test_stack_bands_and_crop():
-    input_folder = r"C:\Users\watercore\Desktop\1\S2A_43SCC_20221219_0_L2A"
-    output_folder = r"C:\Users\watercore\Desktop\1\output"
-    dst_resolution = 10
-    window_size = 512
-    overlap_size = 64
-    stack_bands_and_crop(input_folder, output_folder, dst_resolution, window_size, overlap_size)
-
-
 def get_last_level_sub_folders(root_folder: str):
+    rel_paths = []
     for dir_path, dirs, files in os.walk(root_folder):
         if len(dirs) == 0:
-            yield dir_path
+            rel_paths.append(dir_path)
+    return rel_paths
 
 
 
