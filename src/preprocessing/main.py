@@ -1,6 +1,6 @@
 import os.path
 from preprocessing.crop import get_last_level_sub_folders, preprocess1_wrapper
-from preprocessing.norm import read_folder_and_hist, read_root_folder_and_hist
+from preprocessing.norm import read_folder_and_hist, read_root_folder_and_hist, cal_min_and_max
 import argparse
 from tqdm.contrib.concurrent import process_map
 
@@ -35,4 +35,5 @@ def preprocess3_cli():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input_folder", type=str)
     args = parser.parse_args()
-    read_root_folder_and_hist(args.input_folder)
+    save_path = read_root_folder_and_hist(args.input_folder)
+    cal_min_and_max(save_path)

@@ -3,7 +3,7 @@ import numpy as np
 import os
 import json
 import glob
-
+import matplotlib.pyplot as plt
 
 def read_file_and_hist(input_path: str):
     uint16_num = np.iinfo(np.uint16).max + 1
@@ -61,10 +61,43 @@ def read_root_folder_and_hist(root_folder: str):
 
     save_path = os.path.join(root_folder, "hist.npy")
     np.save(save_path, result)
+    return save_path
 
 
+def plot_hist(input_path: str):
+    all_bands = ["B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12"]
+    hist_data = np.load(input_path)
+    for i, band in enumerate(all_bands):
+        fig, ax = plt.subplots()
+        indexes = [i for i in range(20000)]
+        data = hist_data[i, indexes]
+        ax.bar(indexes, data)
+        ax.set_xlabel('Index')
+        ax.set_ylabel('Value')
+        save_path = os.path.join(os.path.dirname(input_path), f"{band}_hist.png")
+        plt.savefig(save_path, dpi=1000)
 
 
+def find_percent_sum(array, percentage: float):
+    target = percentage * np.sum(array)
+    current_sum = 0
+    for i in range(len(array)):
+        current_sum += array[i]
+        if current_sum >= target:
+            return i
+
+
+def cal_min_and_max(input_path: str):
+    all_bands = ["B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12"]
+    hist_data = np.load(input_path)
+    result = {}
+    for i, band in enumerate(all_bands):
+        min_value = find_percent_sum(hist_data[i], percentage=0.01)
+        max_value = find_percent_sum(hist_data[i], percentage=0.99)
+        result[band] = {"min": min_value, "max": max_value}
+    norm_path = os.path.join(os.path.dirname(input_path), "norm.json")
+    with open(norm_path, "w") as file:
+        json.dump(result, file)
 
 
 
