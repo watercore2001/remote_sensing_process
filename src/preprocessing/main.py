@@ -1,8 +1,7 @@
 import os.path
 from preprocessing.crop import get_last_level_sub_folders, preprocess1_wrapper
-from preprocessing.norm import read_folder_and_hist
+from preprocessing.norm import read_folder_and_hist, read_root_folder_and_hist
 import argparse
-import shutil
 from tqdm.contrib.concurrent import process_map
 
 
@@ -18,7 +17,6 @@ def preprocess2(input_folder: str):
     folders = [os.path.join(input_folder, folder) for folder in os.listdir(input_folder)]
     process_map(read_folder_and_hist, folders)
 
-
 def preprocess1_cli():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input_folder", type=str)
@@ -32,3 +30,9 @@ def preprocess2_cli():
     parser.add_argument("-i", "--input_folder", type=str)
     args = parser.parse_args()
     preprocess2(args.input_folder)
+
+def preprocess3_cli():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input_folder", type=str)
+    args = parser.parse_args()
+    read_root_folder_and_hist(args.input_folder)

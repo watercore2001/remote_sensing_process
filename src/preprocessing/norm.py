@@ -4,7 +4,8 @@ import os
 import json
 import glob
 
-def read_file_and_hist(input_path:str):
+
+def read_file_and_hist(input_path: str):
     uint16_num = np.iinfo(np.uint16).max + 1
     result = []
 
@@ -19,13 +20,7 @@ def read_file_and_hist(input_path:str):
     return np.array(result)
 
 
-def test_read_file_and_hist():
-    input_path = r"C:\Users\watercore\Desktop\2\S2A_43SCC_20221219_0_L2A\0101.tif"
-    result = read_file_and_hist(input_path)
-
-
 def read_folder_and_hist(input_folder: str):
-
     metadata_path = os.path.join(input_folder, "metadata.json")
     with open(metadata_path, 'r') as file:
         metadata = json.load(file)
@@ -39,4 +34,53 @@ def read_folder_and_hist(input_folder: str):
 
     save_path = os.path.join(input_folder, "hist.npy")
     np.save(save_path, result)
+
+def get_subdirectories(directory):
+    sub_directories = []
+    for item in os.listdir(directory):
+        item_path = os.path.join(directory, item)
+        if os.path.isdir(item_path):
+            sub_directories.append(item_path)
+    return sub_directories
+
+
+def read_root_folder_and_hist(root_folder: str):
+    all_bands = ["B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12"]
+    uint16_num = np.iinfo(np.uint16).max + 1
+    result = np.zeros(shape=(len(all_bands), uint16_num), dtype=int)
+    for input_folder in get_subdirectories(root_folder):
+        metadata_path = os.path.join(input_folder, "metadata.json")
+        hist_path = os.path.join(input_folder, "hist.npy")
+        with open(metadata_path, 'r') as file:
+            metadata = json.load(file)
+            bands = metadata["bands"]
+        hist_data = np.load(hist_path)
+
+        for i, band in enumerate(bands):
+            result[all_bands.index(band)] += hist_data[i]
+
+    save_path = os.path.join(root_folder, "hist.npy")
+    np.save(save_path, result)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

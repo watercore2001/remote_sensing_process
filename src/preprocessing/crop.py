@@ -101,8 +101,8 @@ def stack_bands_and_crop(input_folder: str, output_folder: str,  dst_resolution:
             with rasterio.open(output_path, "w", **profile) as dst:
                 dst.write(dst_data)
 
-def write_metadata(input_folder: str, output_folder: str):
 
+def write_metadata(input_folder: str, output_folder: str):
     bands_filenames = ["B02.tif", "B03.tif", "B04.tif", "B05.tif", "B06.tif",
                        "B07.tif", "B08.tif", "B8A.tif", "B11.tif", "B12.tif"]
     metadata = {"bands": []}
