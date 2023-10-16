@@ -4,9 +4,11 @@ from preprocessing.crop import get_last_level_sub_folders, stack_bands_and_crop,
 from preprocessing.norm import read_folder_and_hist
 import argparse
 import shutil
+from tqdm import tqdm
+from tqdm.contrib.concurrent import process_map
 
 def preprocess1(input_root_folder: str, output_root_folder: str):
-    for rel_path in get_last_level_sub_folders(input_root_folder):
+    for rel_path in tqdm(get_last_level_sub_folders(input_root_folder)):
         input_folder = os.path.join(input_root_folder, rel_path)
         output_folder = os.path.join(output_root_folder, os.path.basename(rel_path))
         if os.path.exists(output_folder):
@@ -24,13 +26,11 @@ def test_preprocess1():
     output_root_folder = r"C:\Users\watercore\Desktop\2"
     preprocess1(input_root_folder, output_root_folder)
 
+
 def preprocess2(input_folder: str, num_processes: int):
     folders = [os.path.join(input_folder, folder) for folder in os.listdir(input_folder)]
+    process_map(read_folder_and_hist, folders, max_workers=num_processes)
 
-    pool = multiprocessing.Pool(processes=num_processes)
-    pool.map(read_folder_and_hist, folders)
-    pool.close()
-    pool.join()
 
 def test_preprocess2():
     input_folder = r"C:\Users\watercore\Desktop\2\S2A_43SCC_20221219_0_L2A"
