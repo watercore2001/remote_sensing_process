@@ -8,7 +8,6 @@ import os
 
 
 def write_metadata(input_folder: str, output_folder: str):
-    os.makedirs(output_folder, exist_ok=True)
 
     bands_filenames = ["B02.tif", "B03.tif", "B04.tif", "B05.tif", "B06.tif",
                        "B07.tif", "B08.tif", "B8A.tif", "B11.tif", "B12.tif"]
@@ -97,7 +96,6 @@ def stack_bands_and_crop(input_folder: str, output_folder: str,  dst_resolution:
     with rasterio.open(input_path_for_src) as src:
         window_transform = src.window_transform
 
-    os.makedirs(output_folder, exist_ok=True)
     real_window_size = window_size - overlap_size
     row_count = (profile["height"] - window_size) // real_window_size + 1
     col_count = (profile["width"] - window_size) // real_window_size + 1

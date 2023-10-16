@@ -3,14 +3,21 @@ import multiprocessing
 from preprocessing.crop import get_last_level_sub_folders, stack_bands_and_crop, write_metadata
 from preprocessing.norm import read_folder_and_hist
 import argparse
-
+import shutil
 
 def preprocess1(input_root_folder: str, output_root_folder: str):
     for rel_path in get_last_level_sub_folders(input_root_folder):
         input_folder = os.path.join(input_root_folder, rel_path)
         output_folder = os.path.join(output_root_folder, os.path.basename(rel_path))
-        stack_bands_and_crop(input_folder, output_folder, dst_resolution=10, window_size=512, overlap_size=64)
-        write_metadata(input_folder, output_folder)
+        if os.path.exists(output_folder):
+            continue
+        try:
+            os.makedirs(output_folder, exist_ok=True)
+            stack_bands_and_crop(input_folder, output_folder, dst_resolution=10, window_size=512, overlap_size=64)
+            write_metadata(input_folder, output_folder)
+        except:
+            shutil.rmtree(output_folder)
+
 
 def test_preprocess1():
     input_root_folder = r"C:\Users\watercore\Desktop\1"
