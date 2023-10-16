@@ -6,29 +6,6 @@ import numpy as np
 import shutil
 import os
 
-
-def write_metadata(input_folder: str, output_folder: str):
-
-    bands_filenames = ["B02.tif", "B03.tif", "B04.tif", "B05.tif", "B06.tif",
-                       "B07.tif", "B08.tif", "B8A.tif", "B11.tif", "B12.tif"]
-    metadata = {"bands": []}
-    for input_filename in bands_filenames:
-        input_path = os.path.join(input_folder, input_filename)
-        if not os.path.exists(input_path):
-            continue
-        metadata["bands"].append(os.path.splitext(input_filename)[0])
-
-    metadata_path = os.path.join(output_folder, "metadata.json")
-    with open(metadata_path, "w") as file:
-        json.dump(metadata, file)
-
-    copy_filenames = ["tileinfo_metadata.json", "granule_metadata.xml"]
-    for filename in copy_filenames:
-        input_path = os.path.join(input_folder, filename)
-        output_path = os.path.join(output_folder, filename)
-        shutil.copy2(input_path, output_path)
-
-
 def read_data_with_up_sample(input_path: str, dst_resolution: int):
     with rasterio.open(input_path) as src:
         src_resolution = max(src.res)
@@ -123,6 +100,39 @@ def stack_bands_and_crop(input_folder: str, output_folder: str,  dst_resolution:
 
             with rasterio.open(output_path, "w", **profile) as dst:
                 dst.write(dst_data)
+
+def write_metadata(input_folder: str, output_folder: str):
+
+    bands_filenames = ["B02.tif", "B03.tif", "B04.tif", "B05.tif", "B06.tif",
+                       "B07.tif", "B08.tif", "B8A.tif", "B11.tif", "B12.tif"]
+    metadata = {"bands": []}
+    for input_filename in bands_filenames:
+        input_path = os.path.join(input_folder, input_filename)
+        if not os.path.exists(input_path):
+            continue
+        metadata["bands"].append(os.path.splitext(input_filename)[0])
+
+    metadata_path = os.path.join(output_folder, "metadata.json")
+    with open(metadata_path, "w") as file:
+        json.dump(metadata, file)
+
+    copy_filenames = ["tileinfo_metadata.json", "granule_metadata.xml"]
+    for filename in copy_filenames:
+        input_path = os.path.join(input_folder, filename)
+        output_path = os.path.join(output_folder, filename)
+        shutil.copy2(input_path, output_path)
+
+
+def preprocess1_wrapper(args: tuple):
+    input_folder, output_folder = args
+    if os.path.exists(output_folder):
+        return
+    try:
+        os.makedirs(output_folder, exist_ok=True)
+        stack_bands_and_crop(input_folder, output_folder, dst_resolution=10, window_size=512, overlap_size=64)
+        write_metadata(input_folder, output_folder)
+    except:
+        shutil.rmtree(output_folder)
 
 
 def get_last_level_sub_folders(root_folder: str):
