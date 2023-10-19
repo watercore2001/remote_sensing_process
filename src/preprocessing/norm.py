@@ -5,10 +5,12 @@ import json
 import glob
 import matplotlib.pyplot as plt
 
-def read_file_and_hist(input_path: str):
-    uint16_num = np.iinfo(np.uint16).max + 1
-    result = []
+uint16_num = np.iinfo(np.uint16).max + 1
+all_bands = ["B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12"]
 
+
+def read_file_and_hist(input_path: str):
+    result = []
     with rasterio.open(input_path) as src:
         for band in src.read():
             band_hist = [0] * uint16_num
@@ -26,7 +28,6 @@ def read_folder_and_hist(input_folder: str):
         metadata = json.load(file)
         bands = metadata["bands"]
 
-    uint16_num = np.iinfo(np.uint16).max + 1
     result = np.zeros(shape=(len(bands), uint16_num), dtype=int)
 
     for tif_file in glob.iglob(os.path.join(input_folder, "*.tif")):
@@ -34,6 +35,7 @@ def read_folder_and_hist(input_folder: str):
 
     save_path = os.path.join(input_folder, "hist.npy")
     np.save(save_path, result)
+
 
 def get_subdirectories(directory):
     sub_directories = []
@@ -45,8 +47,6 @@ def get_subdirectories(directory):
 
 
 def read_root_folder_and_hist(root_folder: str):
-    all_bands = ["B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12"]
-    uint16_num = np.iinfo(np.uint16).max + 1
     result = np.zeros(shape=(len(all_bands), uint16_num), dtype=int)
     for input_folder in get_subdirectories(root_folder):
         metadata_path = os.path.join(input_folder, "metadata.json")
@@ -65,7 +65,6 @@ def read_root_folder_and_hist(root_folder: str):
 
 
 def plot_hist(input_path: str):
-    all_bands = ["B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12"]
     hist_data = np.load(input_path)
     for i, band in enumerate(all_bands):
         fig, ax = plt.subplots()
@@ -79,16 +78,16 @@ def plot_hist(input_path: str):
 
 
 def find_percent_sum(array, percentage: float):
-    target = percentage * np.sum(array)
+    # neglect 0 value
+    target = percentage * np.sum(array[1:])
     current_sum = 0
-    for i in range(len(array)):
+    for i in range(1, len(array)):
         current_sum += array[i]
         if current_sum >= target:
             return i
 
 
 def cal_min_and_max(input_path: str):
-    all_bands = ["B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12"]
     hist_data = np.load(input_path)
     result = {}
     for i, band in enumerate(all_bands):
@@ -98,16 +97,6 @@ def cal_min_and_max(input_path: str):
     norm_path = os.path.join(os.path.dirname(input_path), "norm.json")
     with open(norm_path, "w") as file:
         json.dump(result, file)
-
-
-
-
-
-
-
-
-
-
 
 
 
