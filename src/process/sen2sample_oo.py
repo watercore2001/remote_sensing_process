@@ -405,9 +405,10 @@ if __name__ == "__main__":
 
     # 获取栅格数据元数据
     with rasterio.open(args.sat_file) as sat:
-        sat_shape = sat.shape
+
         sat_epsg = sat.crs.to_epsg()
         # 处理 Nodata 掩膜
+        sat_shape = sat.shape
         sat_mask = np.ones(sat_shape, np.int8) * 255
         sat_mask[sat.read(1) == 0] = 0
         sat_mask = features.sieve(sat_mask, size=500)

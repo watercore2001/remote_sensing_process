@@ -1,9 +1,10 @@
-import rasterio
-import numpy as np
-import os
-import json
 import glob
+import json
+import os
+
 import matplotlib.pyplot as plt
+import numpy as np
+import rasterio
 
 uint16_num = np.iinfo(np.uint16).max + 1
 all_bands = ["B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12"]

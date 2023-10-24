@@ -1,8 +1,10 @@
-import os.path
-from preprocessing.crop import get_last_level_sub_folders, preprocess1_wrapper
-from preprocessing.norm import read_folder_and_hist, read_root_folder_and_hist, cal_min_and_max
 import argparse
+import os.path
+
+from process.crop import get_last_level_sub_folders, preprocess1_wrapper
 from tqdm.contrib.concurrent import process_map
+
+from process.norm import read_folder_and_hist, read_root_folder_and_hist, cal_min_and_max
 
 
 def preprocess1(input_root_folder: str, output_root_folder: str):

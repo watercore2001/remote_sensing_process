@@ -1,6 +1,7 @@
-import shutil
 import os
-from process.cropper.util import WindowArg
+import shutil
+
+from process.util import WindowArg
 
 
 class SlideWindowCropper:

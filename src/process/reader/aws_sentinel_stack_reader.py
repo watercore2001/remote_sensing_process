@@ -1,18 +1,20 @@
-import rasterio
-import glob
-import os
-import numpy as np
-from rasterio.windows import Window
 import copy
+import glob
 import json
+import os
 import shutil
-from process.reader.util import read_data_with_up_sample
+
+import numpy as np
+import rasterio
+from rasterio.windows import Window
+
+from process.reader.util import read_data_with_up_sample, BaseReader
 from process.util import WindowArg
 
 
-class FolderReader:
-    bands_filenames = ["B02.tif", "B03.tif", "B04.tif", "B05.tif", "B06.tif",
-                       "B07.tif", "B08.tif", "B8A.tif", "B11.tif", "B12.tif"]
+class AwsSentinelStackReader(BaseReader):
+    band_filenames = ["B02.tif", "B03.tif", "B04.tif", "B05.tif", "B06.tif",
+                      "B07.tif", "B08.tif", "B8A.tif", "B11.tif", "B12.tif"]
 
     def __init__(self, folder_path: str, dst_resolution: int):
         self.folder_path = folder_path
@@ -31,6 +33,7 @@ class FolderReader:
                 profile = temp_profile
             else:
                 data = np.concatenate([data, temp_data], axis=0)
+                # todo not change count here
                 profile["count"] += 1
         return data, profile
 
@@ -62,7 +65,7 @@ class FolderReader:
 
     def read_metadata(self, output_folder: str):
         metadata = {"bands": []}
-        for input_filename in self.bands_filenames:
+        for input_filename in self.band_filenames:
             input_path = os.path.join(self.folder_path, input_filename)
             if not os.path.exists(input_path):
                 continue

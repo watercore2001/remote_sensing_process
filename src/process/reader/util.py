@@ -1,8 +1,24 @@
-import rasterio
-from rasterio.enums import Resampling
-import numpy as np
-import dataclasses
 import os
+
+import numpy as np
+import rasterio
+from osgeo import gdal, ogr
+from rasterio.enums import Resampling
+
+gdal.UseExceptions()
+
+
+
+class BaseReader:
+    def read_data_and_profile(self, *args):
+        raise NotImplementedError
+
+    def read_window_transform(self, *args):
+        raise NotImplementedError
+
+    def crop_data(self, *args):
+        raise NotImplementedError
+
 
 def read_data_with_up_sample(input_path: str, dst_resolution: int):
     with rasterio.open(input_path) as src:
@@ -56,56 +72,58 @@ def get_last_level_sub_folders(root_folder: str):
     return rel_paths
 
 
-def rasterize(
-        shp_path_list: list[str], value_list: list[int], bounds: rasterio.coords.BoundingBox, output_path: str
-):
-    """
-    rasterize each shapefile and then stack into one raster file
-    Args:
-        shp_path_list: shapefiles need to rasterize
-        bounds: bounds to
-        output_path: 输出文件路径
-        value_list: 每个 shapefile 文件栅格化的值
-    """
+def rasterize_shapefiles(shp_paths: list[str], burn_values: list[int], tif_path: str, output_path: str):
+    assert len(shp_paths) == len(burn_values), "shp num should be corresponding to value num"
+    shp_num = len(shp_paths)
 
-    dir_name = os.path.dirname(output_path)
+    # read shapefile data
+    shp_driver = ogr.GetDriverByName("ESRI Shapefile")
 
-    shapefile_num = len(shapefile_path_list)
+    # read tif data
+    tif_dst = gdal.Open(tif_path)
 
-    # 比较运算符优先级相同, 且可以串联使用
-    if 1 < shapefile_num == len(value_list):
-        raster_files = []
-        nums = []
-        shp_id = 0
+    # create output file
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    tif_driver = gdal.GetDriverByName("GTiff")
+    out_dst = tif_driver.Create(utf8_path=output_path, xsize=tif_dst.RasterXSize,
+                                ysize=tif_dst.RasterYSize, bands=shp_num, eType=gdal.GDT_Byte, options=["COMPRESS=LZW"])
 
-        for shp, val in zip(shapefile_path_list, value_list):
-            # shapefile 栅格化后的临时文件
-            raster_file = os.path.splitext(shp)[0] + ".tif"
-            # 在文件名前添加参数 -<i>, 用于 gdal_calc
-            raster_files.append("-%s %s" % (chr(65 + shp_id), raster_file))
-            nums.append(chr(65 + shp_id))
-            shp_id = shp_id + 1
+    # copy CRS and Transform
+    out_dst.SetProjection(tif_dst.GetProjection())
+    out_dst.SetGeoTransform(tif_dst.GetGeoTransform())
+    tif_dst = None
 
-            # rasterize single shapefile
-            os.system(
-                rf"gdal_rasterize -burn {val} -ot Byte -te {bounds.left} {bounds.bottom} {bounds.right} {bounds.top} -tr 10 10 {shp} {raster_file}"
-            )
+    for i, (shp_path, burn_value) in enumerate(zip(shp_paths, burn_values), start=1):
+        shp_dst = shp_driver.Open(shp_path, 0)
+        shp_layer = shp_dst.GetLayer()
+        gdal.RasterizeLayer(dataset=out_dst, bands=[i], layer=shp_layer, burn_values=[burn_value])
+        shp_dst = None
 
-        input_path = " ".join(raster_files)  # "-1 shape1.tif -2 shape2.tif"
-        str_chs = ",".join(nums)  # "1,2"
-        # 将栅格化后的图像整合为 output_file, 使用 max_value 的整合规则
+    out_dst = None
 
-        os.system(
-            rf'gdal_calc.py --overwrite --outfile={output_path} {input_path} --calc="numpy.max(({str_chs}), axis=0)"'
-        )
 
-        # 删除中间文件
-        [os.remove(file.split(" ")[1]) for file in raster_files]
+def rasterize_geojson(json_paths: list[str], burn_values: list[int], tif_path: str, output_path: str):
+    assert len(json_paths) == len(burn_values), "shp num should be corresponding to value num"
+    json_num = len(json_paths)
 
-    elif 1 == shapefile_num == len(value_list):
-        os.system(
-            rf"gdal_rasterize -burn {value_list[0]} -ot Byte -te {bounds.left} {bounds.bottom} {bounds.right} {bounds.top} -tr 10 10 {shapefile_path_list[0]} {output_path}"
-        )
+    # read tif data
+    tif_dst = gdal.Open(tif_path)
 
-    else:
-        raise Exception("shp 和 value 个数不匹配")
+    # create output file
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    tif_driver = gdal.GetDriverByName("GTiff")
+    out_dst = tif_driver.Create(utf8_path=output_path, xsize=tif_dst.RasterXSize,
+                                ysize=tif_dst.RasterYSize, bands=json_num, eType=gdal.GDT_Byte, options=["COMPRESS=LZW"])
+
+    # copy CRS and Transform
+    out_dst.SetProjection(tif_dst.GetProjection())
+    out_dst.SetGeoTransform(tif_dst.GetGeoTransform())
+    tif_dst = None
+
+    for i, (shp_path, burn_value) in enumerate(zip(json_paths, burn_values), start=1):
+        json_dst = ogr.Open(shp_path, 0)
+        json_layer = json_dst.GetLayer()
+        gdal.RasterizeLayer(dataset=out_dst, bands=[i], layer=json_layer, burn_values=[burn_value])
+        json_dst = None
+
+    out_dst = None
