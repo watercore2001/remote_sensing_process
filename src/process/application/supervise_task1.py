@@ -27,10 +27,10 @@ class AwsLabelFilesManager:
         self.aws_client = Client.open(url=self.aws_url)
         self.shp_reader = None
         self.image_reader = None
-        self.cropper = ObjectOrientedCropper
+        self.cropper = None
 
     def run(self):
-        # self.download_all_aws_files()
+        self.download_all_aws_files()
         self.generate_dataset()
 
     def get_prefer_item(self, aws_ids: tuple[str]):
@@ -102,7 +102,7 @@ class AwsLabelFilesManager:
                              if filename in os.listdir(shapefile_folder)]
 
         geometry_list = get_shapefile_geometrys(sample_shapefiles, sat_geom)
-
+        geometry_list.sort(key=lambda x: x.Area(), reverse=True)
         cropper = ObjectOrientedCropper(image_height, image_width, self.window_size, geometry_list, self.shp_reader)
         return cropper
 

@@ -81,14 +81,14 @@ class ShpReader(BaseReader):
         data[:, sat_mask == 0] = self.unsure_value
         return data
 
-    def get_window_score(self, window_arg: WindowArg, current_geometry: ogr.Geometry):
+    def get_window_score(self, window_arg: WindowArg, current_geometry: ogr.Geometry = None):
         data = self.data_for_score[:, window_arg.row_start:window_arg.row_end, window_arg.col_start:window_arg.col_end]
         # 1.if contains unsure value, drop window
         if np.isin(self.unsure_value, data):
             return None
         window_geom = window2geom(self.affine_transform, window_arg)
         # 2.if not contain the current geometry, drop window
-        if not current_geometry.Intersect(window_geom):
+        if current_geometry is not None and not current_geometry.Intersect(window_geom):
             return None
         # 3.if not contain any un cropped pixel, drop window
         score = np.sum(np.logical_and(0 < data, data < 100))

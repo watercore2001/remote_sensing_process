@@ -1,1 +1,1 @@
-from .supervise_task import AwsLabelFilesManager
+from .supervise_task2 import AwsLabelFilesManager
