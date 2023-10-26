@@ -1,7 +1,7 @@
 from pystac_client import Client
 import os
 from process.util import window2geom, WindowArg
-from process.application.util import get_aws_sentinel_ids, get_shapefile_geometrys
+from process.application.util import get_shapefile_geometrys
 from process.cropper import SlideWindowCropper
 from process.reader import ShpReader, AwsSentinelUnstackReader
 from urllib import request

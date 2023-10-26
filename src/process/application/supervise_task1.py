@@ -8,12 +8,7 @@ from urllib import request
 import rasterio
 from osgeo import ogr, osr
 
-
-
 class AwsLabelFilesManager:
-    aws_url = "https://earth-search.aws.element84.com/v1"
-    aws_asset = {"B01": "coastal", "B02": "blue", "B03": "green", "B04": "red", "B05": "rededge1", "B06": "rededge2",
-                 "B07": "rededge3", "B08": "nir", "B8A": "nir08", "B09": "nir09", "B11": "swir16", "B12": "swir22"}
     label_shp_filename = "water.shp"
     false_shp_filename = "false.shp"
     unsure_shp_file = "notsure.shp"
@@ -32,37 +27,6 @@ class AwsLabelFilesManager:
     def run(self):
         self.download_all_aws_files()
         self.generate_dataset()
-
-    def get_prefer_item(self, aws_ids: tuple[str]):
-        item_search = self.aws_client.search(collections="sentinel-2-l2a", ids=aws_ids)
-        prefer_item = None
-        for item in item_search.item_collection():
-            if prefer_item is None or item.id.endswith("0_L2A"):
-                prefer_item = item
-        return prefer_item
-
-    def download_one_item_hrefs(self, item, download_folder: str):
-        os.makedirs(download_folder, exist_ok=True)
-        for band, name in self.aws_asset.items():
-            href = item.assets[name].href
-            download_path = os.path.join(download_folder, f"{band}.tif")
-            if os.path.exists(download_path):
-                continue
-            request.urlretrieve(href, download_path)
-
-    def download_all_aws_files(self):
-        for folder in os.listdir(self.input_folder):
-            shapefile_folder = os.path.join(self.input_folder, folder)
-            if not os.path.isdir(shapefile_folder):
-                continue
-            aws_ids = get_aws_sentinel_ids(folder)
-            print(aws_ids)
-            prefer_item = self.get_prefer_item(aws_ids)
-            if prefer_item is None:
-                continue
-            print(prefer_item.id)
-            download_folder = os.path.join(shapefile_folder, "image")
-            self.download_one_item_hrefs(prefer_item, download_folder)
 
     def init_shp_reader(self, shapefile_folder: str):
         # todo optimize here
