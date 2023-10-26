@@ -3,7 +3,7 @@ import os
 from process.util import window2geom, WindowArg
 from process.application.util import get_aws_sentinel_ids, get_shapefile_geometrys
 from process.cropper import SlideWindowCropper
-from process.reader import ShpReader, AwsSentinelUnstackReader
+from process.reader import ShpReader, AwsSentinelStackReader
 from urllib import request
 import rasterio
 from osgeo import ogr, osr
@@ -94,7 +94,7 @@ class AwsLabelFilesManager:
         with rasterio.open(sat_tif_path) as src:
             image_height = src.height
             image_width = src.width
-        cropper = SlideWindowCropper(image_height, image_width, self.window_size, 64, self.shp_reader)
+        cropper = SlideWindowCropper(image_height, image_width, self.window_size, 0, self.shp_reader)
         return cropper
 
     def generate_dataset(self):
@@ -122,14 +122,14 @@ class AwsLabelFilesManager:
             if not os.path.isdir(shapefile_folder):
                 continue
             self.shp_reader = self.init_shp_reader(shapefile_folder)
-            self.image_reader = AwsSentinelUnstackReader(os.path.join(shapefile_folder, "image"))
+            self.image_reader = AwsSentinelStackReader(os.path.join(shapefile_folder, "image"), dst_resolution=10, bands=["B02.tif", "B03.tif", "B04.tif", "B08.tif"])
             self.cropper = self.init_slide_cropper(shapefile_folder)
             for window, window_id in iter(self.cropper):
                 sample_id += 1
-                shp_output_path = os.path.join(self.output_folder, "gt", f"{sample_id}.tif")
-                image_output_folder = os.path.join(self.output_folder, "image", f"{sample_id}")
+                shp_output_path = os.path.join(self.output_folder, "gt", f"{folder}_{sample_id}.tif")
                 self.shp_reader.crop_data(window, shp_output_path, window_id)
-                self.image_reader.crop_data(window, output_folder=image_output_folder)
+                output_path = os.path.join(self.output_folder, "image", f"{folder}_{sample_id}.tif")
+                self.image_reader.crop_data(window, output_path=output_path)
 
                 #todo
                 feature = ogr.Feature(window_layer.GetLayerDefn())

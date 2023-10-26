@@ -16,17 +16,18 @@ class AwsSentinelStackReader(BaseReader):
     band_filenames = ["B02.tif", "B03.tif", "B04.tif", "B05.tif", "B06.tif",
                       "B07.tif", "B08.tif", "B8A.tif", "B11.tif", "B12.tif"]
 
-    def __init__(self, folder_path: str, dst_resolution: int):
+    def __init__(self, folder_path: str, dst_resolution: int, bands: list[str]):
         self.folder_path = folder_path
         self.dst_resolution = dst_resolution
-        self.data, self.profile = self.read_data_and_profile()
+        self.data, self.profile = self.read_data_and_profile(bands)
         # use window_transform to update transform of sample
         self.window_transform = self.read_window_transform()
 
-    def read_data_and_profile(self):
+    def read_data_and_profile(self, bands):
         data = None
         profile = None
-        for input_path in glob.glob(os.path.join(self.folder_path, "*.tif")):
+        for band in bands:
+            input_path = os.path.join(self.folder_path, band)
             temp_data, temp_profile = read_data_with_up_sample(input_path, self.dst_resolution)
             if data is None and profile is None:
                 data = temp_data
@@ -38,7 +39,7 @@ class AwsSentinelStackReader(BaseReader):
         return data, profile
 
     def read_window_transform(self):
-        input_path_for_src = glob.glob(os.path.join(self.folder_path, "*.tif"))[0]
+        input_path_for_src = os.path.join(self.folder_path, "B04.tif")
         with rasterio.open(input_path_for_src) as src:
             window_transform = src.window_transform
         return window_transform
