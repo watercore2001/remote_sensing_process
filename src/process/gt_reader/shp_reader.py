@@ -3,16 +3,16 @@ import os
 
 import numpy as np
 import rasterio
-from rasterio import features
 from einops import reduce
-from osgeo import ogr, osr
+from osgeo import ogr
+from rasterio import features
 from rasterio.windows import Window
 
-from process.reader.util import rasterize_shapefiles, BaseReader
 from process.util import WindowArg, window2geom
+from .util import rasterize_shapefiles
 
 
-class ShpReader(BaseReader):
+class ShpReader:
     negative_value = 99
     cropped_value = 254
     unsure_value = 255
@@ -47,11 +47,6 @@ class ShpReader(BaseReader):
             self.epsg = src.crs.to_epsg()
             self.window_transform = src.window_transform
             self.affine_transform = rasterio.transform.AffineTransformer(src.transform)
-
-        # create window output shapefile
-        #output_window_shp_path = os.path.join(rasterize_output_folder, "window.shp")
-        # self.window_layer = None
-        #self.create_window_layer(output_window_shp_path)
 
 
     def read_zero_data_and_profile(self, sat_tif_path: str):

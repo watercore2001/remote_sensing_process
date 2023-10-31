@@ -1,10 +1,11 @@
 from osgeo import ogr
 
-from process.reader.shp_reader import ShpReader
+from process.gt_reader.shp_reader import ShpReader
 from process.util import WindowArg, window2geom
+from .cropper import Cropper
 
 
-class ObjectOrientedCropper:
+class ObjectOrientedCropper(Cropper):
     def __init__(self, image_height: int, image_width: int, window_size: int,
                  geometry_list: list[ogr.Geometry], shp_reader: ShpReader):
 

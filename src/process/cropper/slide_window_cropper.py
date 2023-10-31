@@ -1,10 +1,9 @@
-import os
-import shutil
-
+from process.gt_reader.shp_reader import ShpReader
 from process.util import WindowArg
-from process.reader.shp_reader import ShpReader
+from .cropper import Cropper
 
-class SlideWindowCropper:
+
+class SlideWindowCropper(Cropper):
     def __init__(self, image_height: int, image_width: int, window_size: int, overlap_size: int, shp_reader: ShpReader):
         self.image_height = image_height
         self.image_width = image_width

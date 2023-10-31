@@ -1,10 +1,13 @@
-from pystac_client import Client
 import os
 from urllib import request
-from .downloader import Downloader
+
+from pystac_client import Client
+
+from .base_downloader import BaseDownloader
+from .util import sentinel2_l2a_asset
 
 
-class AwsDownloader(Downloader):
+class AwsDownloader(BaseDownloader):
     aws_url = "https://earth-search.aws.element84.com/v1"
 
     def __init__(self):
@@ -12,15 +15,13 @@ class AwsDownloader(Downloader):
 
 
 class AwsSentinel2L2aDownloader(AwsDownloader):
-    sentinel2_l2a_asset = {"B01": "coastal", "B02": "blue", "B03": "green", "B04": "red", "B05": "rededge1",
-                           "B06": "rededge2", "B07": "rededge3", "B08": "nir", "B8A": "nir08", "B09": "nir09",
-                           "B11": "swir16", "B12": "swir22"}
+    sentinel2_l2a_asset = sentinel2_l2a_asset
 
     def __init__(self):
         super().__init__()
 
     def get_possible_item_ids(self, folder_name: str) -> list[str]:
-        """Get possible item ids in aws download source
+        """Get possible item ids in aws downloader source
 
         :param folder_name: such as T47RPL_20211001T034549
         :return: such as [S2A_47RPL_20211001_0_L2A, S2A_47RPL_20211001_1_L2A, S2B_47RPL_20211001_0_L2A, S2B_47RPL_20211001_1_L2A]
@@ -53,4 +54,20 @@ class AwsSentinel2L2aDownloader(AwsDownloader):
             if os.path.exists(download_path):
                 continue
             request.urlretrieve(href, download_path)
+
+    def download_all_files(self, input_folder: str, download_sub_folder: str, bands: list[str]):
+        for folder_name in os.listdir(input_folder):
+            if not os.path.isdir(os.path.join(input_folder, folder_name)):
+                continue
+            item_ids = self.get_possible_item_ids(folder_name)
+            print(f"Possible downloaded item ids: {item_ids}.")
+            downloaded_item = self.get_best_item(item_ids)
+            if downloaded_item is None:
+                print("There is not accessible item in possible items, skip this scene.")
+                continue
+            print(f"The item ID to be downloaded is: {downloaded_item.id}.")
+
+            download_folder = os.path.join(input_folder, folder_name, download_sub_folder)
+            self.download_one_item_hrefs(downloaded_item, bands, download_folder)
+        return [f"{band}.tif" for band in bands]
 
