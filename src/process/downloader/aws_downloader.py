@@ -49,7 +49,8 @@ class AwsSentinel2L2aDownloader(AwsDownloader):
         assert set(bands).issubset(accessible_bands), \
             f"Accessible bands: {accessible_bands}, input bands {bands} are not all accessible"
         for band in bands:
-            href = downloaded_item.assets[band].href
+            band_index = self.sentinel2_l2a_asset[band]
+            href = downloaded_item.assets[band_index].href
             download_path = os.path.join(download_folder, f"{band}.tif")
             if os.path.exists(download_path):
                 continue
@@ -70,4 +71,3 @@ class AwsSentinel2L2aDownloader(AwsDownloader):
             download_folder = os.path.join(input_folder, folder_name, download_sub_folder)
             self.download_one_item_hrefs(downloaded_item, bands, download_folder)
         return [f"{band}.tif" for band in bands]
-

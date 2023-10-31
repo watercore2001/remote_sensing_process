@@ -32,14 +32,14 @@ def read_data_with_up_sample(input_path: str, dst_resolution: int):
             return dst_data, profile
 
 
-def up_sample_and_save_as_tif(input_path: str, output_path: str, dst_resolution:int):
+def up_sample_and_save_as_tif(input_path: str, output_path: str, dst_resolution: int):
     data, profile = read_data_with_up_sample(input_path, dst_resolution)
 
     with rasterio.open(output_path, 'w', **profile) as dst:
         dst.write(data)
 
 
-def up_sample_and_sqrt_and_save_as_jpeg(input_path: str, output_path: str, dst_resolution:int):
+def up_sample_and_sqrt_and_save_as_jpeg(input_path: str, output_path: str, dst_resolution: int):
     data, profile = read_data_with_up_sample(input_path, dst_resolution)
 
     # Apply square root operation
@@ -71,7 +71,8 @@ def rasterize_geojson(json_paths: list[str], burn_values: list[int], tif_path: s
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     tif_driver = gdal.GetDriverByName("GTiff")
     out_dst = tif_driver.Create(utf8_path=output_path, xsize=tif_dst.RasterXSize,
-                                ysize=tif_dst.RasterYSize, bands=json_num, eType=gdal.GDT_Byte, options=["COMPRESS=LZW"])
+                                ysize=tif_dst.RasterYSize, bands=json_num, eType=gdal.GDT_Byte,
+                                options=["COMPRESS=LZW"])
 
     # copy CRS and Transform
     out_dst.SetProjection(tif_dst.GetProjection())

@@ -1,16 +1,15 @@
 from process.gt_reader.shp_reader import ShpReader
 from process.util import WindowArg
-from .cropper import Cropper
+from .base_cropper import BaseCropper
 
 
-class SlideWindowCropper(Cropper):
+class SlideWindowCropper(BaseCropper):
     def __init__(self, image_height: int, image_width: int, window_size: int, overlap_size: int, shp_reader: ShpReader):
+        super().__init__(shp_reader)
         self.image_height = image_height
         self.image_width = image_width
         self.window_size = window_size
         self.overlap_size = overlap_size
-
-        self.shp_reader = shp_reader
 
     def get_window_and_check_bound(self, row_start: int, col_start: int):
         if (row_start + self.window_size) > self.image_height:
@@ -22,8 +21,8 @@ class SlideWindowCropper(Cropper):
         if col_start < 0:
             col_start = 0
 
-        return WindowArg(row_start=row_start, row_end=row_start+self.window_size,
-                         col_start=col_start, col_end=col_start+self.window_size)
+        return WindowArg(row_start=row_start, row_end=row_start + self.window_size,
+                         col_start=col_start, col_end=col_start + self.window_size)
 
     def __iter__(self):
         real_window_size = self.window_size - self.overlap_size
@@ -38,17 +37,5 @@ class SlideWindowCropper(Cropper):
                 score = self.shp_reader.get_window_score(window_args)
                 if score is None:
                     continue
-                window_id = f"{row_id+1:02}{col_id+1:02}"
+                window_id = f"{row_id + 1:02}{col_id + 1:02}"
                 yield window_args, window_id
-
-
-
-
-
-
-
-
-
-
-
-

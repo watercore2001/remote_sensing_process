@@ -98,12 +98,3 @@ def cal_min_and_max(input_path: str):
     norm_path = os.path.join(os.path.dirname(input_path), "norm.json")
     with open(norm_path, "w") as file:
         json.dump(result, file)
-
-
-
-
-
-
-
-
-

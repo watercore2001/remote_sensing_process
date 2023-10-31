@@ -3,14 +3,14 @@ import json
 import os
 import shutil
 
-from einops import rearrange
 import numpy as np
 import rasterio
+from einops import rearrange
 from rasterio.windows import Window
 
+from process.util import WindowArg
 from .base_reader import SatReader
 from .util import read_data_with_up_sample
-from process.util import WindowArg
 
 
 class StackReader(SatReader):
@@ -82,7 +82,3 @@ class StackReader(SatReader):
             input_path = os.path.join(self.folder_path, filename)
             output_path = os.path.join(output_folder, filename)
             shutil.copy2(input_path, output_path)
-
-
-
-

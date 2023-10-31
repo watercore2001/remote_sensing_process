@@ -10,11 +10,10 @@ from .base_reader import SatReader
 
 
 class UnstackReader(SatReader):
-    band_filenames = ["B01.tif", "B02.tif", "B03.tif", "B04.tif", "B05.tif", "B06.tif",
-                      "B07.tif", "B08.tif", "B8A.tif", "B09.tif", "B11.tif", "B12.tif"]
 
     def __init__(self, folder_path: str, band_filenames: list[str]):
         self.folder_path = folder_path
+        self.band_filenames = band_filenames
         self.datas, self.profiles, self.window_transforms, self.resolutions \
             = self.read_data_and_profile_and_window_transform()
         self.min_resolution = min(self.resolutions)
@@ -60,7 +59,8 @@ class UnstackReader(SatReader):
             profile.update(height=height,
                            width=width,
                            transform=dst_transform)
-            dst_data = self.datas[i][:, window_arg.row_start:window_arg.row_end, window_arg.col_start:window_arg.col_end]
+            dst_data = self.datas[i][:, window_arg.row_start:window_arg.row_end,
+                       window_arg.col_start:window_arg.col_end]
 
             # remove nodata crop
             nodata_percentage = np.count_nonzero(dst_data == 0) / dst_data.size
@@ -69,7 +69,3 @@ class UnstackReader(SatReader):
 
             with rasterio.open(band_output_path, "w", **profile) as dst:
                 dst.write(dst_data)
-
-
-
-

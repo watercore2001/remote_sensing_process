@@ -10,5 +10,3 @@ class SatReader:
 
     def crop_data(self, window_arg: WindowArg, output_path: str):
         raise NotImplementedError
-
-

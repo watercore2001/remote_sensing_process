@@ -1,16 +1,14 @@
+import argparse
 import os
 
 import rasterio
 from osgeo import ogr, osr
 
-from process.downloader import AwsDownloader, sentinel2_l2a_bands
 from process.application.util import init_oo_cropper, init_shp_reader
-from process.sat_reader import StackReader, UnstackReader
 from process.cropper import SlideWindowCropper
+from process.downloader import AwsSentinel2L2aDownloader, sentinel2_l2a_bands
+from process.sat_reader import StackReader, UnstackReader
 from process.util import window2geom
-
-
-import argparse
 
 
 def parse_args():
@@ -20,13 +18,13 @@ def parse_args():
     parser.add_argument("-i", "--input_folder", type=str, required=True, help="Input label folder")
     parser.add_argument("-o", "--output_folder", type=str, required=True)
     parser.add_argument("-b", "--bands", choices=sentinel2_l2a_bands, type=str, required=True, nargs="+")
-    parser.add_argument("--window_size", type=int, required=True, help="")
+    parser.add_argument("-w", "--window_size", type=int, required=True, help="")
 
     parser.add_argument("-c", "--cropper", choices=cropper_choices, type=str, required=True, help="")
     parser.add_argument("--window_overlap_size", type=int, help="")
     parser.add_argument("--cropper_path", type=str, help="")
 
-    parser.add_argument("-s", "--use_stack", type=bool, required=True, help="If stack bands in sat dataset.")
+    parser.add_argument("-s", "--use_stack", action=argparse.BooleanOptionalAction)
 
     args = parser.parse_args()
 
@@ -37,7 +35,8 @@ def parse_args():
     if args.cropper == "file" and args.cropper_path is None:
         parser.error("Argument --cropper_path requires when --cropper is file.")
     os.makedirs(args.output_folder, exist_ok=True)
-
+    os.makedirs(os.path.join(args.output_folder, "sat"), exist_ok=True)
+    os.makedirs(os.path.join(args.output_folder, "sat"), exist_ok=True)
     return args
 
 
@@ -45,7 +44,7 @@ def main():
     args = parse_args()
 
     # 1. download aws sentinel-2 sat images
-    aws_downloader = AwsDownloader()
+    aws_downloader = AwsSentinel2L2aDownloader()
     band_filenames = aws_downloader.download_all_files(input_folder=args.input_folder,
                                                        download_sub_folder="image",
                                                        bands=args.bands)
@@ -57,8 +56,8 @@ def main():
             continue
 
         # todo
-        os.makedirs(os.path.join(shapefile_folder, "rasterize_output"), exist_ok=True)
-        output_window_shp_path = os.path.join(shapefile_folder, "rasterize_output", "window.shp")
+        os.makedirs(os.path.join(shapefile_folder, "output"), exist_ok=True)
+        output_window_shp_path = os.path.join(shapefile_folder, "output", "window.shp")
         driver = ogr.GetDriverByName("ESRI Shapefile")
         if os.path.exists(output_window_shp_path):
             driver.DeleteDataSource(output_window_shp_path)
@@ -83,7 +82,8 @@ def main():
             case "object":
                 cropper = init_oo_cropper(shapefile_folder, sat_tif_path, args.window_size, shp_reader)
             case "slide":
-                cropper = SlideWindowCropper(image_height, image_width, args.window_size, args.window_overlap_size, shp_reader)
+                cropper = SlideWindowCropper(image_height, image_width, args.window_size, args.window_overlap_size,
+                                             shp_reader)
             case "file":
                 raise NotImplementedError
             case _:
@@ -115,4 +115,5 @@ def main():
             # todo
 
 
-
+if __name__ == "__main__":
+    main()

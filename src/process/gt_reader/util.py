@@ -5,7 +5,6 @@ from osgeo import gdal, ogr
 gdal.UseExceptions()
 
 
-
 def rasterize_shapefiles(shp_paths: list[str], burn_values: list[int], tif_path: str, output_path: str):
     assert len(shp_paths) == len(burn_values), "shp num should be corresponding to value num"
     shp_num = len(shp_paths)

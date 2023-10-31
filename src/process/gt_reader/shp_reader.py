@@ -48,7 +48,6 @@ class ShpReader:
             self.window_transform = src.window_transform
             self.affine_transform = rasterio.transform.AffineTransformer(src.transform)
 
-
     def read_zero_data_and_profile(self, sat_tif_path: str):
         with rasterio.open(sat_tif_path) as src:
             data = np.zeros(shape=(1, src.height, src.width), dtype=np.uint8)
@@ -94,7 +93,8 @@ class ShpReader:
 
     def update_cropped_area(self, window_arg: WindowArg):
         # update
-        self.data_for_score[:, window_arg.row_start:window_arg.row_end, window_arg.col_start:window_arg.col_end] = self.cropped_value
+        self.data_for_score[:, window_arg.row_start:window_arg.row_end,
+        window_arg.col_start:window_arg.col_end] = self.cropped_value
 
     def crop_data(self, window_arg: WindowArg, output_path: str, window_id: str):
         os.makedirs(os.path.dirname(output_path), exist_ok=True)

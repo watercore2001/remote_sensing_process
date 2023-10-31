@@ -1,10 +1,11 @@
-from osgeo import ogr
-import os
 import glob
-from process.gt_reader import ShpReader
+import os
+
 import rasterio
+from osgeo import ogr
 
 from process.cropper import ObjectOrientedCropper
+from process.gt_reader import ShpReader
 from process.util import window2geom, WindowArg
 
 LabelShpFilename = "label*.shp"
@@ -18,7 +19,7 @@ def init_shp_reader(shapefile_folder: str, sat_tif_path: str):
         burn_values = None
     else:
         label_paths = glob.glob(os.path.join(shapefile_folder, LabelShpFilename))
-        burn_values = [i+1 for i in range(len(label_paths))]
+        burn_values = [i + 1 for i in range(len(label_paths))]
 
     false_path = os.path.join(shapefile_folder, FalseShpFilename)
     if not os.path.exists(false_path):

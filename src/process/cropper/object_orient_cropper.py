@@ -2,18 +2,18 @@ from osgeo import ogr
 
 from process.gt_reader.shp_reader import ShpReader
 from process.util import WindowArg, window2geom
-from .cropper import Cropper
+from .base_cropper import BaseCropper
 
 
-class ObjectOrientedCropper(Cropper):
+class ObjectOrientedCropper(BaseCropper):
     def __init__(self, image_height: int, image_width: int, window_size: int,
                  geometry_list: list[ogr.Geometry], shp_reader: ShpReader):
+        super().__init__(shp_reader)
 
         self.image_height = image_height
         self.image_width = image_width
         self.window_size = window_size
         self.geometry_list = geometry_list
-        self.shp_reader = shp_reader
 
         self.is_geom_skip = [False] * len(geometry_list)
 
@@ -27,8 +27,8 @@ class ObjectOrientedCropper(Cropper):
         if col_start < 0:
             col_start = 0
 
-        return WindowArg(row_start=row_start, row_end=row_start+self.window_size,
-                         col_start=col_start, col_end=col_start+self.window_size)
+        return WindowArg(row_start=row_start, row_end=row_start + self.window_size,
+                         col_start=col_start, col_end=col_start + self.window_size)
 
     def iter_small_geom(self, current_geometry: ogr.Geometry):
         def iter_possible_windows(geom_window_: WindowArg):
@@ -82,8 +82,10 @@ class ObjectOrientedCropper(Cropper):
         row_buffer = self.window_size // 8
         col_buffer = self.window_size // 8
         geom_window = self.get_geom_window(current_geometry)
-        for row_start in next_line(geom_window.row_start - row_buffer, geom_window.row_end + row_buffer, self.window_size):
-            for col_start in next_line(geom_window.col_start - col_buffer, geom_window.col_end + col_buffer, self.window_size):
+        for row_start in next_line(geom_window.row_start - row_buffer, geom_window.row_end + row_buffer,
+                                   self.window_size):
+            for col_start in next_line(geom_window.col_start - col_buffer, geom_window.col_end + col_buffer,
+                                       self.window_size):
                 window = self.get_window_and_check_bound(row_start, col_start)
                 score = self.shp_reader.get_window_score(window, current_geometry)
                 if score is None:
@@ -98,20 +100,6 @@ class ObjectOrientedCropper(Cropper):
             yield from self.iter_small_geom(current_geometry)
         else:
             yield from self.iter_big_geom(current_geometry)
-
-    def get_geom_window(self, geometry: ogr.Geometry):
-        # mbr in crs: (minX, maxX, minY, maxY)
-        geom_geo_envelope = geometry.GetEnvelope()
-        row_start, col_start = self.shp_reader.affine_transform.rowcol(geom_geo_envelope[0], geom_geo_envelope[2])
-        row_end, col_end = self.shp_reader.affine_transform.rowcol(geom_geo_envelope[1], geom_geo_envelope[3])
-
-        if row_start > row_end:
-            row_start, row_end = row_end, row_start
-
-        if col_start > col_end:
-            col_start, col_end = col_end, col_start
-
-        return WindowArg(row_start, row_end, col_start, col_end)
 
     def check_which_geometry_is_contained(self, window: WindowArg):
         window_geom = window2geom(self.shp_reader.affine_transform, window)
@@ -135,5 +123,3 @@ class ObjectOrientedCropper(Cropper):
                 yield window, f"{geometry_id:02d}{window_id:02d}"
 
             self.is_geom_skip[i] = True
-
-

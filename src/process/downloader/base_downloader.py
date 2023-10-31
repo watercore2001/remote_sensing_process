@@ -1,6 +1,3 @@
-import os
-
-
 class BaseDownloader:
     def get_possible_item_ids(self, folder_name: str) -> list[str]:
         raise NotImplementedError
