@@ -9,5 +9,8 @@ class FileCropper(BaseCropper):
         self.window_geometry_list = read_geometry_list(shp_file_path)
 
     def __iter__(self):
+        window_id = 0
         for window_geometry in self.window_geometry_list:
-            yield self.get_geom_window(window_geometry)
+            window_id += 1
+            window_arg = self.get_geom_window(window_geometry)
+            yield window_arg, str(window_id)

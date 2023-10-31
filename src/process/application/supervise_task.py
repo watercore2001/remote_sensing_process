@@ -5,7 +5,7 @@ import rasterio
 from osgeo import ogr, osr
 
 from process.application.util import init_oo_cropper, init_shp_reader
-from process.cropper import SlideWindowCropper
+from process.cropper import SlideWindowCropper, FileCropper
 from process.downloader import AwsSentinel2L2aDownloader, sentinel2_l2a_bands
 from process.sat_reader import StackReader, UnstackReader
 from process.util import window2geom
@@ -18,13 +18,11 @@ def parse_args():
     parser.add_argument("-i", "--input_folder", type=str, required=True, help="Input label folder")
     parser.add_argument("-o", "--output_folder", type=str, required=True)
     parser.add_argument("-b", "--bands", choices=sentinel2_l2a_bands, type=str, required=True, nargs="+")
-    parser.add_argument("-w", "--window_size", type=int, required=True, help="")
+    parser.add_argument("-s", "--use_stack", action=argparse.BooleanOptionalAction)
 
     parser.add_argument("-c", "--cropper", choices=cropper_choices, type=str, required=True, help="")
+    parser.add_argument("--window_size", type=int, help="")
     parser.add_argument("--window_overlap_size", type=int, help="")
-    parser.add_argument("--cropper_path", type=str, help="")
-
-    parser.add_argument("-s", "--use_stack", action=argparse.BooleanOptionalAction)
 
     args = parser.parse_args()
 
@@ -32,8 +30,6 @@ def parse_args():
     if args.cropper == "slide" and args.window_overlap_size is None:
         parser.error("Argument --window_overlap_size requires when --cropper is slide.")
 
-    if args.cropper == "file" and args.cropper_path is None:
-        parser.error("Argument --cropper_path requires when --cropper is file.")
     os.makedirs(args.output_folder, exist_ok=True)
     os.makedirs(os.path.join(args.output_folder, "sat"), exist_ok=True)
     os.makedirs(os.path.join(args.output_folder, "sat"), exist_ok=True)
@@ -85,7 +81,8 @@ def main():
                 cropper = SlideWindowCropper(image_height, image_width, args.window_size, args.window_overlap_size,
                                              shp_reader)
             case "file":
-                raise NotImplementedError
+                shp_file_path = os.path.join(shapefile_folder, "window.shp")
+                cropper = FileCropper(shp_file_path, shp_reader)
             case _:
                 raise ValueError
 

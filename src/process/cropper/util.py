@@ -11,3 +11,4 @@ def read_geometry_list(shp_file_path):
         if geometry is None:
             continue
         geometry_list.append(geometry.Clone())
+    return geometry_list
