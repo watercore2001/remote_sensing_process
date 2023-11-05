@@ -1,11 +1,12 @@
 import glob
 import json
 import os
+from tqdm.contrib.concurrent import process_map
 
 import matplotlib.pyplot as plt
 import numpy as np
 import rasterio
-
+import argparse
 uint16_num = np.iinfo(np.uint16).max + 1
 all_bands = ["B02", "B03", "B04", "B05", "B06", "B07", "B08", "B8A", "B11", "B12"]
 
@@ -49,7 +50,11 @@ def get_subdirectories(directory):
 
 def read_root_folder_and_hist(root_folder: str):
     result = np.zeros(shape=(len(all_bands), uint16_num), dtype=int)
-    for input_folder in get_subdirectories(root_folder):
+    sub_folders = get_subdirectories(root_folder)
+
+    process_map(read_folder_and_hist, sub_folders)
+
+    for input_folder in sub_folders:
         metadata_path = os.path.join(input_folder, "metadata.json")
         hist_path = os.path.join(input_folder, "hist.npy")
         with open(metadata_path, 'r') as file:
@@ -79,9 +84,9 @@ def plot_hist(input_path: str):
 
 
 def find_percent_sum(array, percentage: float):
-    # neglect 0 value
     target = percentage * np.sum(array[1:])
     current_sum = 0
+    # neglect 0 value
     for i in range(1, len(array)):
         current_sum += array[i]
         if current_sum >= target:
@@ -98,3 +103,15 @@ def cal_min_and_max(input_path: str):
     norm_path = os.path.join(os.path.dirname(input_path), "norm.json")
     with open(norm_path, "w") as file:
         json.dump(result, file)
+
+
+def parse_args():
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument("-i", "--input_folder", type=str)
+    return arg_parser.parse_args()
+
+
+def main():
+    args = parse_args()
+    read_root_folder_and_hist(args.input_folder)
+    cal_min_and_max(os.path.join(args.input_folder, "hist.npy"))
