@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 
 import rasterio
@@ -44,8 +45,9 @@ def main():
     args = parse_args()
 
     # 1. download aws sentinel-2 sat images
+    band_filenames = [f"{band}.tif" for band in args.bands]
     aws_downloader = AwsSentinel2L2aDownloader()
-    band_filenames = aws_downloader.download_all_files(input_folder=args.input_folder,
+    aws_downloader.download_all_files(input_folder=args.input_folder,
                                                        download_sub_folder="image",
                                                        bands=args.bands)
 
@@ -98,11 +100,16 @@ def main():
             sat_reader = UnstackReader(sat_folder, band_filenames)
 
         # 6. start generate dataset
+        os.makedirs(os.path.join(args.output_folder, "sat", folder), exist_ok=True)
+        metadata_output_path = os.path.join(args.output_folder, "sat", folder, "metadata.json")
+        with open(metadata_output_path, "w") as file:
+            json.dump(obj={"bands": args.bands}, fp=file)
+
         sample_id = 0
         for window, window_id in iter(cropper):
             sample_id += 1
-            shp_output_path = os.path.join(args.output_folder, "gt", f"{folder}_{sample_id}.tif")
-            sat_output_path = os.path.join(args.output_folder, "sat", f"{folder}_{sample_id}.tif")
+            shp_output_path = os.path.join(args.output_folder, "gt", folder, f"{sample_id}.tif")
+            sat_output_path = os.path.join(args.output_folder, "sat", folder, f"{sample_id}.tif")
 
             shp_reader.crop_data(window, shp_output_path, window_id)
             sat_reader.crop_data(window, sat_output_path)

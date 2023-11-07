@@ -70,4 +70,3 @@ class AwsSentinel2L2aDownloader(AwsDownloader):
 
             download_folder = os.path.join(input_folder, folder_name, download_sub_folder)
             self.download_one_item_hrefs(downloaded_item, bands, download_folder)
-        return [f"{band}.tif" for band in bands]
