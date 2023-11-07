@@ -15,14 +15,18 @@ def parse_args():
     cropper_choices = ["object", "slide", "file"]
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input_folder", type=str, required=True, help="Input label folder")
+    parser.add_argument("-i", "--input_folder", type=str, required=True, help="Input label folder.")
     parser.add_argument("-o", "--output_folder", type=str, required=True)
-    parser.add_argument("-b", "--bands", choices=sentinel2_l2a_bands, type=str, required=True, nargs="+")
-    parser.add_argument("-s", "--use_stack", action=argparse.BooleanOptionalAction)
-
-    parser.add_argument("-c", "--cropper", choices=cropper_choices, type=str, required=True, help="")
-    parser.add_argument("--window_size", type=int, help="")
-    parser.add_argument("--window_overlap_size", type=int, help="")
+    parser.add_argument("-b", "--bands", choices=sentinel2_l2a_bands, type=str, required=True, nargs="+",
+                        help="These bands will be downloaded and subsequently stacked in the order of your input "
+                             "if the -s flag is chosen.")
+    parser.add_argument("-s", "--use_stack", action=argparse.BooleanOptionalAction, help="If stack or not.")
+    parser.add_argument("-c", "--cropper", choices=cropper_choices, type=str, required=True,
+                        help="There are three cropper.")
+    parser.add_argument("--window_size", type=int,
+                        help="This will be used if you choose object cropper and slide cropper.")
+    parser.add_argument("--window_overlap_size", type=int,
+                        help="This will be used if you choose slide cropper.")
 
     args = parser.parse_args()
 
