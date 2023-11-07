@@ -1,4 +1,4 @@
-# Process Remote Sensing Data For Deep Learning V1.3
+# Process Remote Sensing Data For Deep Learning V1.2
 
 ## Setup Environment
 ```angular2html
