@@ -56,7 +56,7 @@ class AwsSentinel2L2aDownloader(AwsDownloader):
                 continue
             request.urlretrieve(href, download_path)
 
-    def download_all_files(self, input_folder: str, download_sub_folder: str, bands: list[str]):
+    def download_all_files(self, input_folder: str,  bands: list[str], download_sub_folder: str = None,):
         for folder_name in os.listdir(input_folder):
             if not os.path.isdir(os.path.join(input_folder, folder_name)):
                 continue
@@ -68,5 +68,8 @@ class AwsSentinel2L2aDownloader(AwsDownloader):
                 continue
             print(f"The item ID to be downloaded is: {downloaded_item.id}.")
 
-            download_folder = os.path.join(input_folder, folder_name, download_sub_folder)
+            if download_sub_folder is None:
+                download_folder = os.path.join(input_folder, folder_name)
+            else:
+                download_folder = os.path.join(input_folder, folder_name, download_sub_folder)
             self.download_one_item_hrefs(downloaded_item, bands, download_folder)

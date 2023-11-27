@@ -4,7 +4,8 @@ from .base_cropper import BaseCropper
 
 
 class SlideWindowCropper(BaseCropper):
-    def __init__(self, image_height: int, image_width: int, window_size: int, overlap_size: int, shp_reader: ShpReader):
+    def __init__(self, image_height: int, image_width: int, window_size: int, overlap_size: int,
+                 shp_reader: ShpReader = None):
         super().__init__(shp_reader)
         self.image_height = image_height
         self.image_width = image_width
@@ -34,8 +35,7 @@ class SlideWindowCropper(BaseCropper):
             for col_id in range(col_count):
                 col_start = col_id * real_window_size
                 window_args = self.get_window_and_check_bound(row_start, col_start)
-                score = self.shp_reader.get_window_score(window_args)
-                if score is None:
+                if self.shp_reader is not None and self.shp_reader.get_window_score(window_args) is None:
                     continue
                 window_id = f"{row_id + 1:02}{col_id + 1:02}"
                 yield window_args, window_id

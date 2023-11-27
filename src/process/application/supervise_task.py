@@ -4,7 +4,7 @@ import os
 
 import rasterio
 from osgeo import ogr, osr
-
+import random
 from process.application.util import init_oo_cropper, init_shp_reader
 from process.cropper import SlideWindowCropper, FileCropper
 from process.downloader import AwsSentinel2L2aDownloader, sentinel2_l2a_bands
@@ -18,6 +18,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input_folder", type=str, required=True, help="Input label folder.")
     parser.add_argument("-o", "--output_folder", type=str, required=True)
+    parser.add_argument("-p", "--train_val_test_percent", type=int, required=True, nargs="+", help="")
     parser.add_argument("-b", "--bands", choices=sentinel2_l2a_bands, type=str, required=True, nargs="+",
                         help="These bands will be downloaded and subsequently stacked in the order of your input "
                              "if the -s flag is chosen.")
@@ -35,9 +36,8 @@ def parse_args():
     if args.cropper == "slide" and args.window_overlap_size is None:
         parser.error("Argument --window_overlap_size requires when --cropper is slide.")
 
-    os.makedirs(args.output_folder, exist_ok=True)
-    os.makedirs(os.path.join(args.output_folder, "sat"), exist_ok=True)
-    os.makedirs(os.path.join(args.output_folder, "sat"), exist_ok=True)
+    assert sum(args.train_val_test_percent) == 100
+
     return args
 
 
@@ -48,8 +48,8 @@ def main():
     band_filenames = [f"{band}.tif" for band in args.bands]
     aws_downloader = AwsSentinel2L2aDownloader()
     aws_downloader.download_all_files(input_folder=args.input_folder,
-                                                       download_sub_folder="image",
-                                                       bands=args.bands)
+                                      download_sub_folder="image",
+                                      bands=args.bands)
 
     # 2. iter scene folder
     for folder in os.listdir(args.input_folder):
@@ -100,16 +100,19 @@ def main():
             sat_reader = UnstackReader(sat_folder, band_filenames)
 
         # 6. start generate dataset
-        os.makedirs(os.path.join(args.output_folder, "sat", folder), exist_ok=True)
-        metadata_output_path = os.path.join(args.output_folder, "sat", folder, "metadata.json")
+        sub_folder_names = ["train", "val", "test"]
+        metadata_output_path = os.path.join(args.output_folder, "metadata.json")
         with open(metadata_output_path, "w") as file:
             json.dump(obj={"bands": args.bands}, fp=file)
 
         sample_id = 0
         for window, window_id in iter(cropper):
+
+            sub_folder_name = random.choices(sub_folder_names, weights=args.train_val_test_percent)[0]
+
             sample_id += 1
-            shp_output_path = os.path.join(args.output_folder, "gt", folder, f"{sample_id}.tif")
-            sat_output_path = os.path.join(args.output_folder, "sat", folder, f"{sample_id}.tif")
+            shp_output_path = os.path.join(args.output_folder, sub_folder_name, "gt", folder, f"{sample_id}.tif")
+            sat_output_path = os.path.join(args.output_folder, sub_folder_name, "sat", folder, f"{sample_id}.tif")
 
             shp_reader.crop_data(window, shp_output_path, window_id)
             sat_reader.crop_data(window, sat_output_path)
