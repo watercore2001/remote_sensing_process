@@ -37,13 +37,20 @@ class StackReader(SatReader):
         data = rearrange(data, "c 1 h w -> c h w")
         return data, profile
 
+    def save(self, output_path: str):
+        _, h, w = self.data.shape()
+        window_arg = WindowArg(row_start=0, row_end=h, col_start=0, col_end=w)
+        self.crop_data(window_arg, output_path)
+
     def read_window_transform(self):
         input_path_for_src = os.path.join(self.folder_path, self.band_filenames[0])
         with rasterio.open(input_path_for_src) as src:
             window_transform = src.window_transform
         return window_transform
 
-    def crop_data(self, window_arg: WindowArg, output_path: str):
+    def crop_data(self, window_arg: WindowArg, output_path: str, drop_nodata_percentage: float = None):
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
         profile = copy.copy(self.profile)
         height = window_arg.row_end - window_arg.row_start
         width = window_arg.col_end - window_arg.col_start
@@ -58,9 +65,10 @@ class StackReader(SatReader):
         dst_data = self.data[:, window_arg.row_start:window_arg.row_end, window_arg.col_start:window_arg.col_end]
 
         # remove nodata crop
-        nodata_percentage = np.count_nonzero(dst_data == 0) / dst_data.size
-        if nodata_percentage >= 0.5:
-            return
+        if drop_nodata_percentage is not None:
+            nodata_percentage = np.count_nonzero(dst_data == 0) / dst_data.size
+            if nodata_percentage >= drop_nodata_percentage:
+                return
 
         with rasterio.open(output_path, "w", **profile) as dst:
             dst.write(dst_data)
