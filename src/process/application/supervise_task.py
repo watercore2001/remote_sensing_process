@@ -18,13 +18,16 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input_folder", type=str, required=True, help="Input label folder.")
     parser.add_argument("-o", "--output_folder", type=str, required=True)
-    parser.add_argument("-p", "--train_val_test_percent", type=int, required=True, nargs="+", help="")
+    parser.add_argument("-p", "--train_val_test_percent", type=int, required=True, nargs="+",
+                        help="The percentage value attributed to train val test set, "
+                             "which should collectively amount to 100.")
     parser.add_argument("-b", "--bands", choices=sentinel2_l2a_bands, type=str, required=True, nargs="+",
                         help="These bands will be downloaded and subsequently stacked in the order of your input "
                              "if the -s flag is chosen.")
-    parser.add_argument("-s", "--use_stack", action=argparse.BooleanOptionalAction, help="If stack or not.")
+    parser.add_argument("-s", "--use_stack", action=argparse.BooleanOptionalAction,
+                        help="If stack or not.")
     parser.add_argument("-c", "--cropper", choices=cropper_choices, type=str, required=True,
-                        help="There are three cropper.")
+                        help="There are three cropper to choose.")
     parser.add_argument("--window_size", type=int,
                         help="This will be used if you choose object cropper and slide cropper.")
     parser.add_argument("--window_overlap_size", type=int,
@@ -47,9 +50,12 @@ def main():
     # 1. download aws sentinel-2 sat images
     band_filenames = [f"{band}.tif" for band in args.bands]
     aws_downloader = AwsSentinel2L2aDownloader()
+    # add B02 in downloaded bands
+    download_bands = set(args.bands)
+    download_bands.add("B02")
     aws_downloader.download_all_files(input_folder=args.input_folder,
                                       download_sub_folder="image",
-                                      bands=args.bands)
+                                      bands=list(download_bands))
 
     # 2. iter scene folder
     for folder in os.listdir(args.input_folder):
@@ -100,6 +106,7 @@ def main():
             sat_reader = UnstackReader(sat_folder, band_filenames)
 
         # 6. start generate dataset
+        os.makedirs(args.output_folder, exist_ok=True)
         sub_folder_names = ["train", "val", "test"]
         metadata_output_path = os.path.join(args.output_folder, "metadata.json")
         with open(metadata_output_path, "w") as file:

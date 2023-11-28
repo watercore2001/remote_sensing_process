@@ -40,20 +40,23 @@ After Setup Environment, There is a command `supervise_dataset` in your conda en
 conda activate process
 supervise_dataset --help
 # then you will see
-usage: supervise_dataset [-h] -i INPUT_FOLDER -o OUTPUT_FOLDER -b {B01,B02,B03,B04,B05,B06,B07,B08,B8A,B09,B11,B12} [{B01,B02,B03,B04,B05,B06,B07,B08,B8A,B09,B11,B12} ...] [-s | --use_stack | --no-use_stack] -c {object,slide,file}
-                         [--window_size WINDOW_SIZE] [--window_overlap_size WINDOW_OVERLAP_SIZE]
+usage: supervise_dataset [-h] -i INPUT_FOLDER -o OUTPUT_FOLDER -p TRAIN_VAL_TEST_PERCENT [TRAIN_VAL_TEST_PERCENT ...] 
+                          -b {B01,B02,B03,B04,B05,B06,B07,B08,B8A,B09,B11,B12} [{B01,B02,B03,B04,B05,B06,B07,B08,B8A,B09,B11,B12} ...]
+                         [-s | --use_stack | --no-use_stack] -c {object,slide,file} [--window_size WINDOW_SIZE] [--window_overlap_size WINDOW_OVERLAP_SIZE]
 
 options:
   -h, --help            show this help message and exit
   -i INPUT_FOLDER, --input_folder INPUT_FOLDER
                         Input label folder.
   -o OUTPUT_FOLDER, --output_folder OUTPUT_FOLDER
+  -p TRAIN_VAL_TEST_PERCENT [TRAIN_VAL_TEST_PERCENT ...], --train_val_test_percent TRAIN_VAL_TEST_PERCENT [TRAIN_VAL_TEST_PERCENT ...]
+                        The percentage value attributed to train val test set, which should collectively amount to 100.
   -b {B01,B02,B03,B04,B05,B06,B07,B08,B8A,B09,B11,B12} [{B01,B02,B03,B04,B05,B06,B07,B08,B8A,B09,B11,B12} ...], --bands {B01,B02,B03,B04,B05,B06,B07,B08,B8A,B09,B11,B12} [{B01,B02,B03,B04,B05,B06,B07,B08,B8A,B09,B11,B12} ...]
                         These bands will be downloaded and subsequently stacked in the order of your input if the -s flag is chosen.
   -s, --use_stack, --no-use_stack
                         If stack or not.
   -c {object,slide,file}, --cropper {object,slide,file}
-                        There are three cropper.
+                        There are three cropper to choose.
   --window_size WINDOW_SIZE
                         This will be used if you choose object cropper and slide cropper.
   --window_overlap_size WINDOW_OVERLAP_SIZE

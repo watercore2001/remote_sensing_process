@@ -13,9 +13,9 @@ class BaseCropper:
 
     def get_geom_window(self, geometry: ogr.Geometry):
         # mbr in crs: (minX, maxX, minY, maxY)
-        geom_geo_envelope = geometry.GetEnvelope()
-        row_start, col_start = self.shp_reader.affine_transform.rowcol(geom_geo_envelope[0], geom_geo_envelope[2])
-        row_end, col_end = self.shp_reader.affine_transform.rowcol(geom_geo_envelope[1], geom_geo_envelope[3])
+        min_x, max_x, min_y, max_y = geometry.GetEnvelope()
+        row_start, col_start = self.shp_reader.affine_transform.rowcol(min_x, min_y)
+        row_end, col_end = self.shp_reader.affine_transform.rowcol(max_x, max_y)
 
         if row_start > row_end:
             row_start, row_end = row_end, row_start

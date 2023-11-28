@@ -43,7 +43,7 @@ class StackReader(SatReader):
         self.crop_data(window_arg, output_path)
 
     def read_window_transform(self):
-        input_path_for_src = os.path.join(self.folder_path, self.band_filenames[0])
+        input_path_for_src = os.path.join(self.folder_path, "B02.tif")
         with rasterio.open(input_path_for_src) as src:
             window_transform = src.window_transform
         return window_transform
