@@ -52,14 +52,6 @@ def up_sample_and_sqrt_and_save_as_jpeg(input_path: str, output_path: str, dst_r
         dst.write(sqrt_data)
 
 
-def get_last_level_sub_folders(root_folder: str):
-    rel_paths = []
-    for dir_path, dirs, files in os.walk(root_folder):
-        if len(dirs) == 0:
-            rel_paths.append(dir_path)
-    return rel_paths
-
-
 def rasterize_geojson(json_paths: list[str], burn_values: list[int], tif_path: str, output_path: str):
     assert len(json_paths) == len(burn_values), "shp num should be corresponding to value num"
     json_num = len(json_paths)

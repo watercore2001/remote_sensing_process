@@ -64,3 +64,11 @@ def init_oo_cropper(shapefile_folder: str, sat_tif_path: str, window_size: int, 
     cropper = ObjectOrientedCropper(image_height, image_width, window_size, geometry_list, shp_reader)
 
     return cropper
+
+
+def get_last_level_sub_folders(root_folder: str):
+    rel_paths = []
+    for dir_path, dirs, files in os.walk(root_folder):
+        if len(dirs) == 0:
+            rel_paths.append(dir_path)
+    return rel_paths
