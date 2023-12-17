@@ -116,7 +116,7 @@ def main():
                          train_val_test_percent=args.train_val_test_percent)
         run_args.append(run_arg)
 
-    process_map(run, run_args, max_workers=16)
+    process_map(run, run_args, max_workers=8)
 
 
 if __name__ == "__main__":
