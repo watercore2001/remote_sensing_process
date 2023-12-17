@@ -108,14 +108,16 @@ def main():
     scene_folders = get_last_level_sub_folders(args.sat_folder)
     run_args = []
 
+    num=0
     for scene_folder in scene_folders:
         lucc_folder = scene_folder.replace(args.sat_folder, args.lucc_folder)
         run_arg = RunArg(scene_folder=scene_folder, lucc_folder=lucc_folder, output_folder=args.output_folder,
                          window_size=args.window_size, window_overlap_size=args.window_overlap_size,
                          bands=args.bands, use_stack=args.use_stack, delete_input=args.delete_input,
                          train_val_test_percent=args.train_val_test_percent)
-        #run_args.append(run_arg)
+        print("{num} current scene", os.path.basename(scene_folder))
         run(run_arg)
+        num += 1
 
     #process_map(run, run_args)
 
