@@ -30,7 +30,7 @@ def read_folder_and_hist(input_folder: str):
         metadata = json.load(file)
         bands = metadata["bands"]
 
-    result = np.zeros(shape=(len(bands), uint16_num), dtype=int)
+    result = np.zeros(shape=(len(bands), uint16_num), dtype=np.int64)
 
     for tif_file in glob.iglob(os.path.join(input_folder, "*.tif")):
         result = result + read_file_and_hist(tif_file)
