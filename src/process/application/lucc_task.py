@@ -88,14 +88,14 @@ def run(args: RunArg):
             lucc_reader.crop_data(window, gt_output_path)
 
         metadata_filenames = ["granule_metadata.xml", "tileinfo_metadata.json"]
-        for sub_folder_name in sub_folder_names:
+        #todo: bad string
+        for sub_folder_name in ["train", "val"]:
             for filename in metadata_filenames:
                 src_path = os.path.join(args.scene_folder, filename)
                 dst_path = os.path.join(args.output_folder, sub_folder_name, "sat", scene_id, filename)
                 shutil.copy(src_path, dst_path)
-
-    except:
-        return 1
+    except Exception as e:
+        print(e)
 
     finally:
         if args.delete_input:
@@ -114,8 +114,7 @@ def main():
                          window_size=args.window_size, window_overlap_size=args.window_overlap_size,
                          bands=args.bands, use_stack=args.use_stack, delete_input=args.delete_input,
                          train_val_test_percent=args.train_val_test_percent)
-        if run(run_arg)==1:
-            print(f"{os.path.basename(scene_folder)} fail")
+        run(run_arg)
 
     #process_map(run, run_args)
 
