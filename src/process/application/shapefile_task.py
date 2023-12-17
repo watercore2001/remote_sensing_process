@@ -50,12 +50,9 @@ def main():
     # 1. download aws sentinel-2 sat images
     band_filenames = [f"{band}.tif" for band in args.bands]
     aws_downloader = AwsSentinel2L2aDownloader()
-    # add B02 in downloaded bands
-    download_bands = set(args.bands)
-    download_bands.add("B02")
     aws_downloader.download_all_files(input_folder=args.input_folder,
                                       download_sub_folder="image",
-                                      bands=list(download_bands))
+                                      bands=args.bands)
 
     # 2. iter scene folder
     for folder in os.listdir(args.input_folder):
@@ -122,7 +119,7 @@ def main():
             sat_output_path = os.path.join(args.output_folder, sub_folder_name, "sat", folder, f"{sample_id}.tif")
 
             shp_reader.crop_data(window, shp_output_path, window_id)
-            sat_reader.crop_data(window, sat_output_path)
+            sat_reader.crop_data(window, str(sat_output_path))
 
             # todo
             feature = ogr.Feature(window_layer.GetLayerDefn())

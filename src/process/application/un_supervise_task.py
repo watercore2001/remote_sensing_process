@@ -19,6 +19,7 @@ def parse_args():
                         help="These bands will be downloaded and subsequently stacked in the order of your input "
                              "if the -s flag is chosen.")
     parser.add_argument("-s", "--use_stack", action=argparse.BooleanOptionalAction, help="If stack or not.")
+    parser.add_argument("-d", "--delete_input", action=argparse.BooleanOptionalAction, help="If delete input sat image.")
     parser.add_argument("--window_size", type=int,
                         help="This will be used if you choose object cropper and slide cropper.")
     parser.add_argument("--window_overlap_size", type=int,
@@ -36,6 +37,7 @@ class RunArg:
     window_overlap_size: int
     bands: list[str]
     use_stack: bool
+    delete_input: bool
 
 
 def run(args: RunArg):
@@ -72,7 +74,8 @@ def run(args: RunArg):
         return 1
 
     finally:
-        shutil.rmtree(args.scene_folder)
+        if args.delete_input:
+            shutil.rmtree(args.scene_folder)
 
 
 
@@ -84,9 +87,9 @@ def main():
 
     for scene_folder in scene_folders:
         output_folder = os.path.join(args.output_folder, os.path.basename(scene_folder))
-        run_arg = RunArg(scene_folder=scene_folder, output_folder=output_folder,
+        run_arg = RunArg(scene_folder=scene_folder, output_folder=str(output_folder),
                          window_size=args.window_size, window_overlap_size=args.window_overlap_size,
-                         bands=args.bands, use_stack=args.use_stack)
+                         bands=args.bands, use_stack=args.use_stack, delete_input=args.delete_input)
         run_args.append(run_arg)
 
     process_map(run, run_args)

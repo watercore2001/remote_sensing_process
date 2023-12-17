@@ -1,7 +1,7 @@
 from process.util import WindowArg
 
 
-class SatReader:
+class SatBaseReader:
     def read_data_and_profile(self, *args):
         raise NotImplementedError
 

@@ -6,10 +6,10 @@ import rasterio
 from rasterio.windows import Window
 
 from process.util import WindowArg
-from .base_reader import SatReader
+from .base_reader import SatBaseReader
 
 
-class UnstackReader(SatReader):
+class UnstackReader(SatBaseReader):
 
     def __init__(self, folder_path: str, band_filenames: list[str]):
         self.folder_path = folder_path

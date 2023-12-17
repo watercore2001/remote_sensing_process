@@ -9,11 +9,11 @@ from einops import rearrange
 from rasterio.windows import Window
 
 from process.util import WindowArg
-from .base_reader import SatReader
+from .base_reader import SatBaseReader
 from .util import read_data_with_up_sample
 
 
-class StackReader(SatReader):
+class StackReader(SatBaseReader):
     def __init__(self, folder_path: str, band_filenames: list[str], dst_resolution: int):
         self.folder_path = folder_path
         self.band_filenames = band_filenames
@@ -43,10 +43,12 @@ class StackReader(SatReader):
         self.crop_data(window_arg, output_path)
 
     def read_window_transform(self):
-        input_path_for_src = os.path.join(self.folder_path, "B02.tif")
-        with rasterio.open(input_path_for_src) as src:
-            window_transform = src.window_transform
-        return window_transform
+        for band_filename in self.band_filenames:
+            input_path = os.path.join(self.folder_path, band_filename)
+            with rasterio.open(input_path) as src:
+                if max(src.res) == self.dst_resolution:
+                    return src.window_transform
+        return 1
 
     def crop_data(self, window_arg: WindowArg, output_path: str, drop_nodata_percentage: float = None):
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
