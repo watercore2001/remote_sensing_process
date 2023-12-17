@@ -102,9 +102,6 @@ def run(args: RunArg):
             shutil.rmtree(args.scene_folder)
             shutil.rmtree(args.lucc_folder)
 
-
-
-
 def main():
     args = parse_args()
 
@@ -117,9 +114,9 @@ def main():
                          window_size=args.window_size, window_overlap_size=args.window_overlap_size,
                          bands=args.bands, use_stack=args.use_stack, delete_input=args.delete_input,
                          train_val_test_percent=args.train_val_test_percent)
-        run_args.append(run_arg)
+        run(run_arg)
 
-    process_map(run, run_args)
+    #process_map(run, run_args)
 
 
 if __name__ == "__main__":
