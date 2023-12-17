@@ -115,7 +115,7 @@ def main():
                          window_size=args.window_size, window_overlap_size=args.window_overlap_size,
                          bands=args.bands, use_stack=args.use_stack, delete_input=args.delete_input,
                          train_val_test_percent=args.train_val_test_percent)
-        print("{num} current scene", os.path.basename(scene_folder))
+        print(f"{num} current scene", os.path.basename(scene_folder))
         run(run_arg)
         num += 1
 
