@@ -83,9 +83,10 @@ def run(args: RunArg):
             sub_folder_name = random.choices(sub_folder_names, weights=args.train_val_test_percent)[0]
             sat_output_path = os.path.join(args.output_folder, sub_folder_name, "sat", scene_id, f"{window_id}.tif")
             gt_output_path = os.path.join(args.output_folder, sub_folder_name, "gt", scene_id, f"{window_id}.tif")
-
-            sat_reader.crop_data(window, sat_output_path)
-            lucc_reader.crop_data(window, gt_output_path)
+            if not os.path.exists(sat_output_path):
+                sat_reader.crop_data(window, sat_output_path)
+            if not os.path.exists(gt_output_path):
+                lucc_reader.crop_data(window, gt_output_path)
 
         metadata_filenames = ["granule_metadata.xml", "tileinfo_metadata.json"]
         #todo: bad string
