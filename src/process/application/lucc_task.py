@@ -114,7 +114,8 @@ def main():
                          window_size=args.window_size, window_overlap_size=args.window_overlap_size,
                          bands=args.bands, use_stack=args.use_stack, delete_input=args.delete_input,
                          train_val_test_percent=args.train_val_test_percent)
-        run(run_arg)
+        if run(run_arg)==1:
+            print(f"{os.path.basename(scene_folder)} fail")
 
     #process_map(run, run_args)
 
