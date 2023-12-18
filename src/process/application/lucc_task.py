@@ -108,7 +108,7 @@ def main():
     run_args = []
 
     for scene_folder in scene_folders:
-        scene_path = os.path.join(args.output_folder, "train", "sat", os.path.basename(args.scene_folder))
+        scene_path = os.path.join(args.output_folder, "train", "sat", os.path.basename(scene_folder))
         if os.path.exists(scene_path):
             continue
         lucc_folder = scene_folder.replace(args.sat_folder, args.lucc_folder)
