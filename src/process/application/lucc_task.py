@@ -83,10 +83,8 @@ def run(args: RunArg):
             sub_folder_name = random.choices(sub_folder_names, weights=args.train_val_test_percent)[0]
             sat_output_path = os.path.join(args.output_folder, sub_folder_name, "sat", scene_id, f"{window_id}.tif")
             gt_output_path = os.path.join(args.output_folder, sub_folder_name, "gt", scene_id, f"{window_id}.tif")
-            if not os.path.exists(sat_output_path):
-                sat_reader.crop_data(window, sat_output_path)
-            if not os.path.exists(gt_output_path):
-                lucc_reader.crop_data(window, gt_output_path)
+            sat_reader.crop_data(window, sat_output_path)
+            lucc_reader.crop_data(window, gt_output_path)
 
         metadata_filenames = ["granule_metadata.xml", "tileinfo_metadata.json"]
         #todo: bad string
@@ -110,6 +108,9 @@ def main():
     run_args = []
 
     for scene_folder in scene_folders:
+        scene_path = os.path.join(args.output_folder, "train", "sat", os.path.basename(args.scene_folder))
+        if os.path.exists(scene_path):
+            continue
         lucc_folder = scene_folder.replace(args.sat_folder, args.lucc_folder)
         run_arg = RunArg(scene_folder=scene_folder, lucc_folder=lucc_folder, output_folder=args.output_folder,
                          window_size=args.window_size, window_overlap_size=args.window_overlap_size,
@@ -117,7 +118,7 @@ def main():
                          train_val_test_percent=args.train_val_test_percent)
         run_args.append(run_arg)
 
-    process_map(run, run_args, max_workers=8)
+    process_map(run, run_args, max_workers=6)
 
 
 if __name__ == "__main__":
