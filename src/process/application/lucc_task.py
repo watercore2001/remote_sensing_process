@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import shutil
+import traceback
 
 import rasterio
 from tqdm.contrib.concurrent import process_map
@@ -94,7 +95,8 @@ def run(args: RunArg):
                 dst_path = os.path.join(args.output_folder, sub_folder_name, "sat", scene_id, filename)
                 shutil.copy(src_path, dst_path)
     except Exception as e:
-        print(e)
+        with open("log.txt", "w+") as f:
+            f.write(str(e))
 
     finally:
         if args.delete_input:
@@ -116,9 +118,10 @@ def main():
                          window_size=args.window_size, window_overlap_size=args.window_overlap_size,
                          bands=args.bands, use_stack=args.use_stack, delete_input=args.delete_input,
                          train_val_test_percent=args.train_val_test_percent)
+        run(run_arg)
         run_args.append(run_arg)
 
-    process_map(run, run_args, max_workers=6)
+    #process_map(run, run_args, max_workers=6)
 
 
 if __name__ == "__main__":
