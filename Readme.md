@@ -1,19 +1,25 @@
-# Process Remote Sensing Data For Deep Learning V1.2
+# Process Remote Sensing Data For Deep Learning V2
 
 ## Setup Environment
 ```angular2html
-#1. install required packages by conda
+#step1. install required packages by conda
 conda create -n process python=3.10
 conda activate process
-conda install gdal rasterio geopandas -c conda-forge
+conda install gdal=3.4.1
 
-#2. install project by pip
+#step2. install project by pip
 git clone git@github.com:watercore2001/remote_sensing_process.git
 cd ./remote_sensing_process
 pip install .
 ```
 
-## Supervise Task: generate dataset by label geojson 
+## Self-supervise Task: generate dataset by sentinel-2 data
+```angular2html
+un_supervise_dataset --help
+```
+
+
+## Supervise Task: generate dataset by label shapefile 
 ### 1. Prepare Input Data
 ```angular2html
 |-- Input Folder
@@ -26,6 +32,8 @@ pip install .
 |  |-- scene folder
 ...
 ```
+label1, label2, label3 means different gt class.
+
 There are some important restrictions on input.
 - The name of every scene folder follows a specific format, known as the scene ID. 
 For example, a scene folder's name may be T50SNG_20230921T052151.
@@ -35,7 +43,7 @@ otherwise, it will result in duplicated samples within the different scenes.
 - The shapefile file should not contain any invalid or null geometry.
 
 ### 2. Run
-After Setup Environment, There is a command `supervise_dataset` in your conda environment.
+After Setup Environment, there is a command `supervise_dataset` in your conda environment.
 ```angular2html
 conda activate process
 supervise_dataset --help
@@ -63,7 +71,24 @@ options:
                         This will be used if you choose slide cropper.
 ```
 
-## Self-supervise Task: generate dataset by sentinel-2 data
+### Output Dataset
+```angular2html
+|-- Output folder
+|  |-- train
+|  |  |-- sat
+|  |  |  |-- scene_folder
+|  |  |  |  |-- 1.tif
+|  |  |-- gt
+|  |  |  |-- scene_folder
+|  |  |  |  |-- 1.tif
+
+|  |-- val
+|  |  |-- sat...
+|  |  |-- gt...
+...
+```
+
+
 
 
 
