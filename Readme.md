@@ -1,4 +1,4 @@
-# Process Remote Sensing Data For Deep Learning V2
+# Process Remote Sensing Data For Deep Learning V3 20250121
 
 ## Setup Environment
 ```angular2html
@@ -24,11 +24,12 @@ un_supervise_dataset --help
 ```angular2html
 |-- Input Folder
 |  |-- scene folder
-|  |  |-- label1.shp
-|  |  |-- label2.shp
-|  |  |-- label3.shp
-|  |  |-- false.shp
-|  |  |-- unsure.shp
+|  |  |-- gt
+|  |  |  |-- 1
+|  |  |  |-- 2
+|  |  |-- img
+|  |  |-- window
+|  |  |  |-- window.shape
 |  |-- scene folder
 ...
 ```
