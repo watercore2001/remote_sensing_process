@@ -9,7 +9,7 @@ from process.gt_reader import ShpReader
 from process.util import window2geom, WindowArg
 
 gt_folder_name = "gt"
-img_folder_name = "img"
+img_folder_name = "image"
 
 
 def init_shp_reader(scene_folder: str, sat_tif_path: str):

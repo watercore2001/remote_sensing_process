@@ -52,7 +52,7 @@ def main():
     band_filenames = [f"{band}.tif" for band in args.bands]
     aws_downloader = AwsSentinel2L2aDownloader()
     aws_downloader.download_all_files(input_folder=args.input_folder,
-                                      download_sub_folder="img",
+                                      download_sub_folder=img_folder_name,
                                       bands=download_bands)
 
     band_composition = "".join(args.bands)
@@ -102,7 +102,7 @@ def main():
             filename = f"{scene_id}_{window}_{band_composition}.tif"
 
             shp_output_path = os.path.join(args.output_folder, sub_folder_name, "gt", scene_id, filename)
-            sat_output_path = os.path.join(args.output_folder, sub_folder_name, "img", scene_id, filename)
+            sat_output_path = os.path.join(args.output_folder, sub_folder_name, "image", scene_id, filename)
 
             shp_reader.crop_data(window, shp_output_path, window_id)
             sat_reader.crop_data(window, str(sat_output_path))
