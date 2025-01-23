@@ -17,6 +17,8 @@ class WindowArg:
         self.col_start = int(self.col_start)
         self.col_end = int(self.col_end)
 
+    def __str__(self):
+        return f"{self.row_start}_{self.row_end}_{self.col_start}_{self.col_end}"
 
 def window2geom(affine_transformer: AffineTransformer, window_arg: WindowArg):
     min_x, min_y = affine_transformer.xy(window_arg.row_end, window_arg.col_start)

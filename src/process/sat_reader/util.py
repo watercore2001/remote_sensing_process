@@ -21,7 +21,7 @@ def read_data_with_up_sample(input_path: str, dst_resolution: int):
                     src.height * upscale_factor,
                     src.width * upscale_factor
                 ),
-                resampling=Resampling.bilinear)
+                resampling=Resampling.nearest)
             dst_transform = src.transform * src.transform.scale((1 / upscale_factor), (1 / upscale_factor))
             profile = src.profile
             profile.update(transform=dst_transform,
