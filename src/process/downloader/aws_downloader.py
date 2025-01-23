@@ -26,14 +26,17 @@ class AwsSentinel2L2aDownloader(AwsDownloader):
         :param folder_name: such as T47RPL_20211001T034549
         :return: such as [S2A_47RPL_20211001_0_L2A, S2A_47RPL_20211001_1_L2A, S2B_47RPL_20211001_0_L2A, S2B_47RPL_20211001_1_L2A]
         """
-        parts = folder_name.split("_")
+        if folder_name.startswith("T"):
+            parts = folder_name.split("_")
 
-        area_id = parts[0][1:]
-        time_id = parts[1][:8]
+            area_id = parts[0][1:]
+            time_id = parts[1][:8]
 
-        product_ids = [f"{sat}_{area_id}_{time_id}_{v}_L2A" for v in range(2) for sat in ["S2A", "S2B"]]
+            product_ids = [f"{sat}_{area_id}_{time_id}_{v}_L2A" for v in range(2) for sat in ["S2A", "S2B"]]
 
-        return product_ids
+            return product_ids
+        else:
+            return [folder_name]
 
     def get_best_item(self, possible_product_ids: list[str]):
         item_search = self.aws_client.search(collections="sentinel-2-l2a", ids=possible_product_ids)
@@ -57,14 +60,16 @@ class AwsSentinel2L2aDownloader(AwsDownloader):
             request.urlretrieve(href, download_path)
 
     def download_all_files(self, input_folder: str,  bands: list[str], download_sub_folder: str = None,):
+        # iter scenes
         for folder_name in os.listdir(input_folder):
             if not os.path.isdir(os.path.join(input_folder, folder_name)):
                 continue
+
             item_ids = self.get_possible_item_ids(folder_name)
-            print(f"Possible downloaded item ids: {item_ids}.")
+            print(f"Possible downloaded item ids are: {item_ids}.")
             downloaded_item = self.get_best_item(item_ids)
             if downloaded_item is None:
-                print("There is not accessible item in possible items, skip this scene.")
+                print(f"Scene {folder_name} has no accessible items, skip.")
                 continue
             print(f"The item ID to be downloaded is: {downloaded_item.id}.")
 

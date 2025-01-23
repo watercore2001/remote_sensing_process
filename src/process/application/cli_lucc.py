@@ -15,15 +15,15 @@ from process.sat_reader import StackReader, UnstackReader, LuccReader
 from process.util import window2geom
 import dataclasses
 
-def parse_args():
 
+def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i1", "--sat_folder", type=str, required=True, help="Input sat folder.")
     parser.add_argument("-i2", "--lucc_folder", type=str, required=True, help="Input lucc folder.")
     parser.add_argument("-o", "--output_folder", type=str, required=True)
     parser.add_argument("-p", "--train_val_test_percent", type=int, required=True, nargs="+",
                         help="The percentage value attributed to train/val/test dataset, "
-                             "which should collectively amount to 100.")
+                             "sum to 100.")
     parser.add_argument("-b", "--bands", choices=sentinel2_l2a_bands, type=str, required=True, nargs="+",
                         help="These bands will be downloaded and subsequently stacked in the order of your input "
                              "if the -s flag is chosen.")
