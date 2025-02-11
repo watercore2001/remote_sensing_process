@@ -69,9 +69,11 @@ class ShpReader:
         # update mask area
         with rasterio.open(sat_tif_path) as src:
             sat_shape = src.shape
-            sat_mask = np.ones(sat_shape, np.int8) * 255
+            sat_mask = np.ones(sat_shape, np.uint8) * 255
+            # nodata area
             sat_mask[src.read(1) == 0] = 0
             sat_mask = features.sieve(sat_mask, size=500)
+        # nodata area is unsure
         data[:, sat_mask == 0] = self.unsure_value
         return data
 
